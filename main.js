@@ -42,6 +42,9 @@ document.addEventListener("DOMContentLoaded", function() {
 	function addReply(post) {
 		replies.push(post)
 	}
+	function reply(post) {
+		document.getElementById("post-content").value = "@" + post.u + " " + document.getElementById("post-content").value
+	}
 	function addPost(post) {
 		// console.log(post)
 		var elem = document.createElement("div")
@@ -54,6 +57,10 @@ document.addEventListener("DOMContentLoaded", function() {
 		header.childNodes[1].appendChild(document.createElement("span"))
 		header.childNodes[1].children[0].classList.add("date");
 		header.childNodes[1].children[0].innerHTML = escapeHTML(new Date(post.t.e * 1000).toString());
+		header.childNodes[1].appendChild(document.createElement("button"))
+		header.childNodes[1].children[1].classList.add("mention_btn");
+		header.childNodes[1].children[1].addEventListener("click", function(){reply(post)})
+		header.childNodes[1].children[1].innerHTML = "mention"
 		// header.childNodes[1].appendChild(document.createElement("button"))
 		// header.childNodes[1].children[1].classList.add("reply_btn");
 		// header.childNodes[1].children[1].addEventListener("click", ()=>addReply(post))
@@ -113,10 +120,12 @@ document.addEventListener("DOMContentLoaded", function() {
 		document.getElementById("closed").style = ""
 	}
 	function updateHome() {
+		document.getElementById("loading").style = ""
 		fetch(apiURL + "home?autoget=1", {
 			"method":"GET"
 		}).then(function (resp) {
 			resp.json().then(function (json) {
+				document.getElementById("loading").style = "display: none"
 				// console.log(json)
 				json.autoget.reverse().forEach(post => addPost(post))
 				// var postsHtml = json.autoget.map(post => `<div class="post">${escapeHTML(post.u)}: ${escapeHTML(post.p)}</div>`);
@@ -129,6 +138,8 @@ document.addEventListener("DOMContentLoaded", function() {
 		// console.log(ev);
 		var username = document.getElementById("login-username").value
 		var password = document.getElementById("login-password").value
+		document.getElementById("error").style = "display: none";
+		document.getElementById("loading").style = ""
 		fetch(apiURL + "auth/login/", {
 			"method":"POST",
 			"headers": {
@@ -140,6 +151,11 @@ document.addEventListener("DOMContentLoaded", function() {
 			})
 		}).then(function (resp) {
 			resp.json().then(function (json) {
+				document.getElementById("loading").style = "display: none"
+				if(json.error) {
+					document.getElementById("error").style = "";
+					return;
+				}
 				// console.log(json)
 				isLoggedIn = true;
 				token = json.token;
