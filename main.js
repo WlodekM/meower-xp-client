@@ -6,6 +6,7 @@ var token;
 var posts;
 var ulist;
 var replies = [];
+var supportsWss = confirm("Does your browser support secure websockets (click yes if on a modern browser)");
 
 var shiftHeld;
 
@@ -32,7 +33,11 @@ document.addEventListener("DOMContentLoaded", function() {
 	posts = document.getElementById("posts")
 	loginForm = document.getElementById("loginForm")
 	isLoggedIn = false;
-	ws = new WebSocket("ws://192.168.56.1:8080/")
+	if(supportsWss) {
+		ws = new WebSocket("wss://server.meower.org/")
+	} else {
+		ws = new WebSocket("ws://192.168.56.1:8080/")
+	}
 	apiURL = "https://api.meower.org/";
 	function addReply(post) {
 		replies.push(post)
