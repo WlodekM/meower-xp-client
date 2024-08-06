@@ -54,10 +54,10 @@ document.addEventListener("DOMContentLoaded", function() {
 		header.childNodes[1].appendChild(document.createElement("span"))
 		header.childNodes[1].children[0].classList.add("date");
 		header.childNodes[1].children[0].innerHTML = escapeHTML(new Date(post.t.e * 1000).toString());
-		header.childNodes[1].appendChild(document.createElement("button"))
-		header.childNodes[1].children[1].classList.add("reply_btn");
-		header.childNodes[1].children[1].addEventListener("click", ()=>addReply(post))
-		header.childNodes[1].children[1].innerHTML = "reply"
+		// header.childNodes[1].appendChild(document.createElement("button"))
+		// header.childNodes[1].children[1].classList.add("reply_btn");
+		// header.childNodes[1].children[1].addEventListener("click", ()=>addReply(post))
+		// header.childNodes[1].children[1].innerHTML = "reply"
 		elem.appendChild(header)
 		if(post.reply_to) {
 			post.reply_to.forEach(reply => {
@@ -146,6 +146,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				loginForm.style = "display: none"
 				document.getElementById("ulist").style = ""
 				document.getElementById("postForm").style = ""
+				document.getElementById("controls").style = ""
 				updateHome()
 			})
 		})
@@ -173,6 +174,10 @@ document.addEventListener("DOMContentLoaded", function() {
 	}
 	loginForm.addEventListener("submit", onFormSubmit)
 	document.getElementById("postForm").addEventListener("submit", onPostFormSubmit)
+	document.getElementById("controls").addEventListener("click", function () {
+		posts.innerHTML = "<span></span>";
+		updateHome();
+	})
 	document.getElementById("post-content").addEventListener("keydown", function (event) {
 		var submitBtn = document.getElementById("post-submit");
 		if (
