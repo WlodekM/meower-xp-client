@@ -154,6 +154,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				document.getElementById("loading").style = "display: none"
 				if(json.error) {
 					document.getElementById("error").style = "";
+					document.getElementById("error").innerHTML = "Error: " + escapeHTML(json.type);
 					return;
 				}
 				// console.log(json)
