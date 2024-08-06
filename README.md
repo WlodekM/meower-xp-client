@@ -32,5 +32,5 @@ node index.js
 
 ### Running the client
 
-To open the client go to [URL] or open the index.html file in your browser (might not work)
+To open the client go to [the client's website](https://wlodekm.github.io/meower-xp-client/) or open the index.html file in your browser (might not work)
 
