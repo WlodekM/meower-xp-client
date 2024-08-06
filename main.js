@@ -7,6 +7,8 @@ var posts;
 var ulist;
 var replies = [];
 var supportsWss = confirm("Does your browser support secure websockets (click yes if on a modern browser)");
+var autoRefresh;
+var autoRefreshEnabled = false;
 
 var shiftHeld;
 
@@ -164,9 +166,23 @@ document.addEventListener("DOMContentLoaded", function() {
 				document.getElementById("ulist").style = ""
 				document.getElementById("postForm").style = ""
 				document.getElementById("controls").style = ""
+				document.getElementById("auto-refresh").addEventListener("click", toggleRefresh)
 				updateHome()
 			})
 		})
+	}
+	function toggleRefresh() {
+		if(!autoRefreshEnabled) {
+			if(!autoRefresh) {
+				autoRefresh = setInterval(updateHome, 5000);	 
+			}
+			autoRefreshEnabled = true;
+			document.getElementById("auto-refresh").innerHTML = "Auto refresh: ON"
+		} else {
+			autoRefreshEnabled = false;
+			clearInterval(autoRefresh)
+			document.getElementById("auto-refresh").innerHTML = "Auto refresh: OFF"
+		}
 	}
 	function onPostFormSubmit(ev) {
 		ev.preventDefault();
