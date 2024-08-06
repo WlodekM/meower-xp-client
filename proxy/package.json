@@ -1,0 +1,12 @@
+{
+  "name": "porxy",
+  "module": "index.js",
+  "type": "module",
+  "devDependencies": {
+  },
+  "peerDependencies": {
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

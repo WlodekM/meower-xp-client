@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>SMC v0.0</title>
+	<script src="./main.js"></script>
+</head>
+
+<body>
+	<h1>Simple meower client</h1> <span id="closed" style="display: none;">DISCONNECTED</span>
+	<form id="loginForm">
+		<input type="text" id="login-username">
+		<input type="password" id="login-password">
+		<input type="submit">
+	</form>
+	<div id="ulist" style="display: none"></div>
+	<form id="postForm" style="display: none">
+		<textarea type="text" id="post-content" style="width: 100%"></textarea>
+		<br>
+		<input type="submit" id="post-submit">
+	</form>
+	<div id="posts">
+		<span></span>
+	</div>
+</body>
+
+<style>
+	/*#posts {
+		display: flex;
+		flex-direction: column-reverse
+	}*/
+	.post {
+		margin-bottom: 1em
+	}
+	.post-image {
+		max-width: 75%
+	}
+	.post-header, .reply-username {
+		font-weight: bold
+	}
+	.reply-username {
+		margin-right: 0.5em
+	}
+	.reply {
+		padding-top: 0.1em;
+		padding-bottom: 0.1em;
+		padding-left: 1em;
+		border-left: black 0.3em solid;
+		background: hsla(0,0%,0%,0.1);
+	}
+	.post-header {
+		display: flex;
+		justify-content: space-between;
+	}
+	.date {
+		font-weight: initial;
+		font-style: italic;
+	}
+</style>
+
+</html>
