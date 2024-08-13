@@ -1,6 +1,6 @@
 # meower-xp-client
 
-A silly little meower client made to work on windows XP.
+A silly little meower client made to work on old browsers.
 
 > [!NOTE]
 > This client was tested on firefox 40.0, i do not guarantee that it will work on earlier version and/or other browsers
