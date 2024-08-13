@@ -12,6 +12,8 @@ You will have to set up a proxy websocket, for this i have provided the code for
 
 ### Running the proxy
 
+If you are running this on a modern browser (or on a browser that doesnt support websockets) [you can skip this section](#running-the-client)
+
 > [!NOTE]
 > To run the proxy you will have to have nodejs installed
 
