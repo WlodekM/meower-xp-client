@@ -5,10 +5,12 @@ var apiURL;
 var token;
 var posts;
 var ulist;
+var user;
 var replies = [];
 var supportsWss = confirm("Does your browser support secure websockets (click yes if on a modern browser)");
 var autoRefresh;
 var autoRefreshEnabled = false;
+var page = 'home';
 
 var shiftHeld;
 
@@ -116,16 +118,35 @@ document.addEventListener("DOMContentLoaded", function() {
 		};
 		if(!isLoggedIn) return;
 		if(parsed.val.mode != 1) return;
+		console.debug(parsed.val.post_origin != page)
+		if(parsed.val.post_origin != page) return;
 		addPost(parsed.val)
 	}
 	ws.onclose = function (ev) {
 		document.getElementById("closed").style = ""
 	}
+	function enableLoadingText() {
+		document.getElementById("loading").style = ""
+	}
+	function disableLoadingText() {
+		document.getElementById("loading").style = "display: none"
+	}
 	function updateHome() {
 		document.getElementById("loading").style = ""
-		fetch(apiURL + "home?autoget=1", {
-			"method":"GET"
-		}).then(function (resp) {
+		var res;
+		if(page == "home") {
+			res = fetch(apiURL + "home?autoget=1", {
+				"method":"GET"
+			});
+		} else {
+			res = fetch(apiURL + "posts/" + page, {
+				"method":"GET",
+				"headers": {
+					"token": token
+				}
+			});
+		}
+		res.then(function (resp) {
 			resp.json().then(function (json) {
 				document.getElementById("loading").style = "display: none"
 				// console.log(json)
@@ -142,16 +163,17 @@ document.addEventListener("DOMContentLoaded", function() {
 		var password = document.getElementById("login-password").value
 		document.getElementById("error").style = "display: none";
 		document.getElementById("loading").style = ""
-		fetch(apiURL + "auth/login/", {
-			"method":"POST",
-			"headers": {
-				"content-type": "application/json"
-			},
-			"body": JSON.stringify({
-				"username":username,
-				"password":password
-			})
-		}).then(function (resp) {
+		var res = fetch(apiURL + "auth/login/", {
+				"method":"POST",
+				"headers": {
+					"content-type": "application/json"
+				},
+				"body": JSON.stringify({
+					"username":username,
+					"password":password
+				})
+			});
+		res.then(function (resp) {
 			resp.json().then(function (json) {
 				document.getElementById("loading").style = "display: none"
 				if(json.error) {
@@ -162,6 +184,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				// console.log(json)
 				isLoggedIn = true;
 				token = json.token;
+				user = json.account;
 				loginForm.style = "display: none"
 				document.getElementById("ulist").style = ""
 				document.getElementById("postForm").style = ""
@@ -188,28 +211,110 @@ document.addEventListener("DOMContentLoaded", function() {
 		ev.preventDefault();
 		console.log(ev);
 		var content = document.getElementById("post-content").value
-		fetch(apiURL + "home/", {
-			"method":"POST",
-			"headers": {
-				"content-type": "application/json",
-				"token": token,
-			},
-			"body": JSON.stringify({
-				"content":content,
+		if(page == 'home') {
+			fetch(apiURL + "home/", {
+				"method":"POST",
+				"headers": {
+					"content-type": "application/json",
+					"token": token,
+				},
+				"body": JSON.stringify({
+					"content":content,
+				})
+			}).then(function (resp) {
+				resp.json().then(function (json) {
+					console.log(json)
+				})
 			})
-		}).then(function (resp) {
-			resp.json().then(function (json) {
-				console.log(json)
+		} else {
+			fetch(apiURL + "posts/" + page, {
+				"method":"POST",
+				"headers": {
+					"content-type": "application/json",
+					"token": token,
+				},
+				"body": JSON.stringify({
+					"content":content,
+				})
+			}).then(function (resp) {
+				resp.json().then(function (json) {
+					console.log(json)
+				})
 			})
-		})
+		}
 		replies = [];
 		document.getElementById("post-content").value = ""
 	}
 	loginForm.addEventListener("submit", onFormSubmit)
 	document.getElementById("postForm").addEventListener("submit", onPostFormSubmit)
-	document.getElementById("controls").addEventListener("click", function () {
+	document.getElementById("refresh").addEventListener("click", function () {
 		posts.innerHTML = "<span></span>";
 		updateHome();
+	})
+	document.getElementById("home").addEventListener("click", function () {
+		posts.innerHTML = "<span></span>";
+		page = "home";
+		updateHome();
+	})
+	/**
+	 * 
+	 * @param {Object} chat the chat
+	 * @param {String} chat._id chat id
+	 * @param {Boolean} chat.allow_pinning allow pinning
+	 * @param {Number} chat.created created time (epoch)
+	 * @param {Boolean} chat.deleted deleted
+	 * @param {Array} chat.emojis emojis
+	 * @param {String} chat.icon icon id
+	 * @param {String} chat.icon_color icon color (hex)
+	 * @param {Number} chat.last_active last active time
+	 * @param {String[]} chat.members members
+	 * @param {String} chat.nickname nickname
+	 * @param {String} chat.owner owner
+	 * @param {Array} chat.stickers stickers
+	 * @param {1|0} chat.type type
+	 */
+	function addChat(chat) {
+		// console.log(post)
+		var elem = document.createElement("div")
+		elem.classList.add("post")
+		var header = document.createElement("div")
+		header.classList.add("post-header")
+		header.classList.add("chat-header")
+		if(chat.type == 1) {
+			header.innerHTML = escapeHTML(chat.members.filter(function (member) {return member != user._id})[0])
+			header.innerHTML += "<span style=\"color: gray;font-size: 0.5em;\">" + escapeHTML(chat._id) + "</span>"
+		} else {
+			header.innerHTML = escapeHTML(chat.nickname)
+		}
+		elem.appendChild(header)
+		var postContent = document.createElement("div")
+		postContent.innerHTML = escapeHTML('go to chat')
+		postContent.addEventListener('click', function () {
+			page = chat._id;
+			posts.innerHTML = "<span></span>";
+			updateHome();
+		})
+		postContent.style = "cursor: pointer";
+		elem.appendChild(postContent)
+		posts.insertBefore(elem, posts.firstChild)
+	}
+	document.getElementById("chats").addEventListener("click", function () {
+		posts.innerHTML = "<span></span>";
+		page = "chats";
+		enableLoadingText()
+		fetch(apiURL + "chats/", {
+			"method":"GET",
+			"headers": {
+				"token": token,
+			}
+		}).then(function (resp) {
+			resp.json().then(function (json) {
+				for (let i = 0; i < json.autoget.length; i++) {
+					addChat(json.autoget[i]);
+				}
+			})
+			disableLoadingText()
+		})
 	})
 	document.getElementById("post-content").addEventListener("keydown", function (event) {
 		var submitBtn = document.getElementById("post-submit");

@@ -8,7 +8,7 @@
 	<script src="./main.js"></script>
 </head>
 
-<body>
+<body id="dark">
 	<h1>Simple meower client</h1> <span id="closed" style="display: none;">DISCONNECTED</span>
 	<form id="loginForm">
 		<input type="text" id="login-username">
@@ -26,6 +26,8 @@
 		<hr>
 		<button id="refresh">Refresh posts</button>
 		<button id="auto-refresh">Auto refresh: OFF</button>
+		<button id="home">Home</button>
+		<button id="chats">Chats</button>
 	</div>
 	<hr>
 	<div id="loading" style="display: none">Loading...</div>
@@ -57,6 +59,20 @@
 		padding-left: 1em;
 		border-left: black 0.3em solid;
 		background: hsla(0,0%,0%,0.1);
+	}
+	body#dark .reply {
+		border-left: white 0.3em solid;
+		background: hsla(0,100%,100%,0.1);
+	}
+	body#dark {
+		background: black;
+		color: white;
+	}
+	input, textarea, button {
+		background: #4c4c5a;
+		color: white;
+		border: #b0b0c5 2px solid;
+		border-radius: 0.25em;
 	}
 	.post-header {
 		display: flex;
