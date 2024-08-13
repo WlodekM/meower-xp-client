@@ -8,7 +8,7 @@ A silly little meower client made to work on old browsers.
 ## Setting up
 
 Since Firefox 40.0 doesn't support secure websockets (``wss://``)
-You will have to make a proxy websocket, for this i have provided the code for a simple proxy in the `proxy` folder.
+You will have to set up a proxy websocket, for this i have provided the code for a simple proxy in the `proxy` folder.
 
 ### Running the proxy
 
