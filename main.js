@@ -190,6 +190,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				document.getElementById("postForm").style = ""
 				document.getElementById("controls").style = ""
 				document.getElementById("auto-refresh").addEventListener("click", toggleRefresh)
+				document.title = "MXPC - Home"
 				updateHome()
 			})
 		})
@@ -197,7 +198,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	function toggleRefresh() {
 		if(!autoRefreshEnabled) {
 			if(!autoRefresh) {
-				autoRefresh = setInterval(updateHome, 5000);	 
+				autoRefresh = setInterval(update, 5000);	 
 			}
 			autoRefreshEnabled = true;
 			document.getElementById("auto-refresh").innerHTML = "Auto refresh: ON"
@@ -245,16 +246,24 @@ document.addEventListener("DOMContentLoaded", function() {
 		replies = [];
 		document.getElementById("post-content").value = ""
 	}
+	function update() {
+		if(page == 'home') {
+			updateHome();
+		} else {
+			updateChat()
+		}
+	}
 	loginForm.addEventListener("submit", onFormSubmit)
 	document.getElementById("postForm").addEventListener("submit", onPostFormSubmit)
 	document.getElementById("refresh").addEventListener("click", function () {
 		posts.innerHTML = "<span></span>";
-		updateHome();
+		update()
 	})
 	document.getElementById("home").addEventListener("click", function () {
 		posts.innerHTML = "<span></span>";
 		page = "home";
 		updateHome();
+		document.title = "MXPC - Home"
 	})
 	/**
 	 * 
@@ -298,9 +307,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		elem.appendChild(postContent)
 		posts.insertBefore(elem, posts.firstChild)
 	}
-	document.getElementById("chats").addEventListener("click", function () {
-		posts.innerHTML = "<span></span>";
-		page = "chats";
+	function updateChat() {
 		enableLoadingText()
 		fetch(apiURL + "chats/", {
 			"method":"GET",
@@ -315,6 +322,11 @@ document.addEventListener("DOMContentLoaded", function() {
 			})
 			disableLoadingText()
 		})
+	}
+	document.getElementById("chats").addEventListener("click", function () {
+		posts.innerHTML = "<span></span>";
+		page = "chats";
+		updateChat()
 	})
 	document.getElementById("post-content").addEventListener("keydown", function (event) {
 		var submitBtn = document.getElementById("post-submit");
