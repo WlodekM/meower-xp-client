@@ -185,6 +185,15 @@ document.addEventListener("DOMContentLoaded", function() {
 				isLoggedIn = true;
 				token = json.token;
 				user = json.account;
+				if(ws) {
+					ws.send(JSON.stringify({
+						cmd: "authpswd",
+						val: {
+							username: username,
+							pswd: token,
+						},
+					}));
+				}
 				loginForm.style = "display: none"
 				document.getElementById("ulist").style = ""
 				document.getElementById("postForm").style = ""

@@ -1,0 +1,333 @@
+<div class="page login">
+    <form id="loginForm" class="center">
+        <img src="./meowerlogo-white.svg" alt="mEOWER">
+        <input type="text" id="username">
+        <br>
+        <input type="password" id="password">
+        <br>
+        <input type="submit" value="Log in">
+        <br>
+        <span id="error"></span>
+    </form>
+</div>
+<div class="page main hidden">
+    <div class="postForm">
+        <textarea name="Post" id="post" placeholder="Write something"></textarea>
+        <button id="postBtn">Send</button>
+    </div>
+    <div class="posts">
+        <span></span>
+    </div>
+</div>
+
+<script>
+    const ws = new WebSocket("wss://server.meower.org/");
+    let q = new URLSearchParams(document.location.search)
+    if(!q.has('invite')) throw new Error(alert('You have to provide a yaeb invite code, run @yaeb invite make in a gc to create one'))
+    if(!q.has('chatID')) throw new Error(alert('You have to provide the chat ID'))
+    const ID = q.get('chatID');
+    const invite = q.get('invite')
+    document.addEventListener("DOMContentLoaded", function() {
+        let shiftHeld = false;
+
+        window.onkeydown = function (e) {
+            if (!e) e = window.event;
+            shiftHeld = e.shiftKey;
+        }
+
+        window.onkeyup = function (e) {
+            if (!e) e = window.event;
+            shiftHeld = e.shiftKey;
+        }
+
+        window.onmousemove = function (e) {
+            if (!e) e = window.event;
+            shiftHeld = e.shiftKey;
+        }
+        let loginForm = document.getElementById("loginForm")
+        let user = '', ulist = [], isLoggedIn = false;
+        window.token = '';
+        let posts = document.querySelector('.posts');
+        function goToPage(page) {
+            document.querySelectorAll('.page').forEach(ele => {
+                if(!ele.classList.contains('hidden')) ele.classList.add('hidden')
+            })
+            document.querySelector(`.page.${page}`).classList.remove('hidden')
+        }
+        async function getChat() {
+            let resp = await fetch(`https://api.meower.org/posts/${ID}/?autoget=1`, {
+                headers: {token: token}
+            })
+            let json = await resp.json()
+            json.autoget.reverse().forEach(post => addPost(post))
+        }
+        document.querySelector('#postBtn').addEventListener('click', function (e) {
+            e.preventDefault()
+            if(!document.querySelector('#post').value) return;
+            let resp = fetch(`https://api.meower.org/posts/${ID}/`, {
+                method: 'post',
+                headers: {
+                    "content-type": "application/json",
+                    token: token
+                },
+                body: JSON.stringify({
+                    content: document.querySelector('#post').value
+                })
+            })
+		    document.getElementById("post").value = ""
+        })
+        function addPost(post) {
+            // console.log(post)
+            var elem = document.createElement("div")
+            elem.classList.add("post")
+            var header = document.createElement("div")
+            header.classList.add("post-header")
+            header.innerText = post.u
+            // header.appendChild(document.createElement("div"))
+            // header.childNodes[1].classList.add("right");
+            // header.childNodes[1].appendChild(document.createElement("span"))
+            // header.childNodes[1].children[0].classList.add("date");
+            // header.childNodes[1].children[0].innerText = new Date(post.t.e * 1000).toString();
+            // header.childNodes[1].appendChild(document.createElement("button"))
+            // header.childNodes[1].children[1].classList.add("mention_btn");
+            // header.childNodes[1].children[1].addEventListener("click", function(){reply(post)})
+            // header.childNodes[1].children[1].innerHTML = "mention"
+            // header.childNodes[1].appendChild(document.createElement("button"))
+            // header.childNodes[1].children[1].classList.add("reply_btn");
+            // header.childNodes[1].children[1].addEventListener("click", ()=>addReply(post))
+            // header.childNodes[1].children[1].innerHTML = "reply"
+            elem.appendChild(header)
+            if(post.reply_to) {
+                post.reply_to.forEach(reply => {
+                    var replyElem = document.createElement("div")
+                    replyElem.classList.add("reply")
+                    replyElem.appendChild(document.createElement("span"))
+                    replyElem.children[0].classList.add("reply-username");
+                    replyElem.children[0].innerText = (reply.u)
+                    replyElem.appendChild(document.createElement("span"))
+                    var replyText = reply.p
+                    if(replyText.length > 40) {
+                        replyText = replyText.slice(0, 47) + "..."
+                    }
+                    replyElem.children[1].innerText = (replyText)
+                    elem.appendChild(replyElem)
+                })
+            }
+            var postContent = document.createElement("div")
+            postContent.innerText = (post.p)
+            elem.appendChild(postContent)
+            if(post.attachments) {
+                post.attachments.forEach(attachment => {
+                    var attElem = document.createElement("a")
+                    attElem.appendChild(document.createElement("img"))
+                    attElem.children[0].classList.add("post-image");
+                    attElem.children[0].alt = attachment.filename;
+                    attElem.children[0].src = `https://uploads.meower.org/attachments/${attachment.id}/${attachment.filename}`
+                    attElem.href = `https://uploads.meower.org/attachments/${attachment.id}/${attachment.filename}`
+                    elem.appendChild(attElem)
+                })
+            }
+            posts.insertBefore(elem, posts.firstChild)
+        }
+        ws.onmessage = async function (ev) {
+            var text = ev.data
+            console.log('INC', text)
+            var parsed = {};
+            try {
+                parsed = JSON.parse(text)
+            } catch (e) {
+            }
+            if(!parsed.val) return;
+            if(parsed.cmd == "ulist") {
+                ulist = parsed.val.split(";");
+                return;
+            };
+            if(parsed.val && parsed.val.mode == 'auth') {
+                document.getElementById("error").innerText = "";
+                token = parsed.val.payload.token
+                isLoggedIn = true;
+                let chatsJSON = await (await fetch(`https://api.meower.org/chats/?autoget=1`, {
+                    headers: {
+                        token: token,
+                        username: username
+                    }
+                })).json()
+                if(!chatsJSON.autoget.find(c => c._id == ID)) {
+                    if(!ulist.includes('yaeb')) return;
+                    let res = await fetch(`https://api.meower.org/users/yaeb/dm`, {
+                        headers: {
+                            token: token,
+                        }
+                    })
+                    let jso = await res.json();
+                    let r = await fetch(`https://api.meower.org/posts/${jso._id}`, {
+                        method: 'POST',
+                        headers: {
+                            "content-type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            content: '@yaeb invite join '+invite
+                        })
+                    })
+                } else {
+                    console.info("is in gc, continuing")
+                    goToPage('main')
+                    getChat();
+                }
+                return
+            }
+            if(!isLoggedIn) return;
+            if(parsed.cmd == 'create_chat' && parsed.val._id == ID) {
+                goToPage('main')
+                getChat();
+                return;
+            }
+            // console.log('is logg in', parsed)
+            if(parsed.val.type != 1) return;
+            // console.log('is post')
+            if(parsed.val.post_origin != ID) return;
+            // console.log('is in gc')
+            addPost(parsed.val)
+        }
+        loginForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const username = document.querySelector('#username').value;
+            const password = document.querySelector('#password').value;
+            document.getElementById("error").innerText = "Loading...";
+            const resp = await fetch("https://api.meower.org/auth/login/", {
+				"method":"POST",
+				"headers": {
+					"content-type": "application/json"
+				},
+				"body": JSON.stringify({
+					"username":username,
+					"password":password
+				})
+			});
+            const json = await resp.json()
+            if(json.error) {
+                document.getElementById("error").style = "";
+                document.getElementById("error").innerText = "Error: " + json.type;
+                return;
+            }
+            token = json.token;
+            user = json.account;
+            ws.send(JSON.stringify({
+                cmd: "authpswd",
+                val: {
+                    username: username,
+                    pswd: token,
+                },
+            }));
+            // goToPage('main')
+        })
+        document.getElementById("post").addEventListener("keydown", function (event) {
+            var submitBtn = document.getElementById("postBtn");
+            if (
+                event.key == "Enter" &&
+                !shiftHeld
+            ) {
+                event.preventDefault();
+                if(!submitBtn.disabled) submitBtn.click();
+            }
+        })
+    })
+</script>
+
+<style>
+    #post {
+        resize: none;
+        margin: 0;
+        display: block;
+        max-width: none;
+        width: 100%;
+    }
+    .postForm {
+        display: flex;
+        margin-bottom: 0.5em;
+    }
+    .center {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 0.1em;
+    }
+    .center img {
+        margin-bottom: 1em;
+        width: 75%;
+    }
+    body {
+        margin: 0;
+        background: #f29e2e;
+        color: white;
+        font-family: sans-serif;
+    }
+    .page.hidden {
+        display: none;
+    }
+    .page {
+        width: calc(100% - 2em);
+        height: calc(100% - 2em);
+        padding: 1em;
+    }
+	.post {
+		margin-bottom: 0.5em;
+		word-wrap: break-word;
+		word-break: break-all;
+        border: 2px white solid;
+        padding: 0.5em;
+	}
+	.post-image {
+		max-width: 75%
+	}
+	.post-header, .reply-username {
+		font-weight: bold
+	}
+	.reply-username {
+		margin-right: 0.5em
+	}
+	.reply {
+		padding: 0.2em;
+		border: white 2px solid;
+        margin-top: 0.1em;
+	}
+    input:autofill, input:-webkit-autofill {
+        background: transparent !important;
+		color: white !important;
+    }
+	input:active, textarea:active, button:active {
+		background: #fff1;
+	}
+	input:hover, textarea:hover, button:hover {
+		background: #fff3;
+	}
+	input, textarea, button {
+		background: transparent;
+		color: white;
+		border: white 2px solid;
+		border-radius: 0;
+	}
+	body#theme-3am .reply {
+		border-left: white 0.3em solid;
+		background: hsla(0,100%,100%,0.1);
+	}
+	body#theme-3am {
+		background: black;
+		color: white;
+	}
+	#theme-3am input, #theme-3am textarea, #theme-3am button {
+		background: #4c4c5a;
+		color: white;
+		border: #b0b0c5 2px solid;
+		border-radius: 0.25em;
+	}
+	.post-header {
+		display: flex;
+		justify-content: space-between;
+	}
+	.date {
+		font-weight: initial;
+		font-style: italic;
+	}
+</style>
