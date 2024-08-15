@@ -11,12 +11,10 @@
     </form>
 </div>
 <div class="page main hidden">
+    <div class="posts"></div>
     <div class="postForm">
         <textarea name="Post" id="post" placeholder="Write something"></textarea>
         <button id="postBtn">Send</button>
-    </div>
-    <div class="posts">
-        <span></span>
     </div>
 </div>
 
@@ -25,8 +23,12 @@
     let q = new URLSearchParams(document.location.search)
     if(!q.has('invite')) throw new Error(alert('You have to provide a yaeb invite code, run @yaeb invite make in a gc to create one'))
     if(!q.has('chatID')) throw new Error(alert('You have to provide the chat ID'))
+    if(q.has('theme')) document.body.parentElement.id = `theme-${q.get('theme')}`;
     const ID = q.get('chatID');
     const invite = q.get('invite')
+	function scrollToBottomOfElement(element) {
+		element.scrollTo(0, element.scrollHeight);
+	}
     document.addEventListener("DOMContentLoaded", function() {
         let shiftHeld = false;
 
@@ -127,7 +129,9 @@
                     elem.appendChild(attElem)
                 })
             }
-            posts.insertBefore(elem, posts.firstChild)
+            let scrolledToBottom = document.body.scrollTopMax == document.body.scrollTop;
+            posts.appendChild(elem)
+            if(scrolledToBottom) scrollToBottomOfElement(document.body);
         }
         ws.onmessage = async function (ev) {
             var text = ev.data
@@ -235,6 +239,24 @@
 </script>
 
 <style>
+    :root {
+        --bg: #f29e2e;
+        --elem-bg: var(--bg);
+        --fg: #ffffff;
+        --border: #ffffff;
+        --border-width: 2px;
+        --border-radius: 0;
+        --button-padding: 0.35em;
+    }
+    :root#theme-meo-like {
+        --bg: #1f1d29;
+        --elem-bg: #2f2c3d;
+        --fg: #e5e1ff;
+        --border: transparent;
+        --border-width: 0;
+        --border-radius: 6px;
+        --button-padding: 0.75em;
+    }
     #post {
         resize: none;
         margin: 0;
@@ -245,6 +267,7 @@
     .postForm {
         display: flex;
         margin-bottom: 0.5em;
+        gap: 0.5em;
     }
     .center {
         display: flex;
@@ -256,12 +279,15 @@
     .center img {
         margin-bottom: 1em;
         width: 75%;
+        max-width: 250px;
     }
     body {
         margin: 0;
-        background: #f29e2e;
-        color: white;
+        background: var(--bg);
+        color: var(--fg);
         font-family: sans-serif;
+        max-height: 100vh;
+        overflow: auto;
     }
     .page.hidden {
         display: none;
@@ -271,12 +297,17 @@
         height: calc(100% - 2em);
         padding: 1em;
     }
+    .page.main {
+        overflow: auto;
+    }
 	.post {
 		margin-bottom: 0.5em;
 		word-wrap: break-word;
 		word-break: break-all;
-        border: 2px white solid;
+        border: var(--border-width) var(--border) solid;
         padding: 0.5em;
+		border-radius: var(--border-radius);
+        background: var(--elem-bg);
 	}
 	.post-image {
 		max-width: 75%
@@ -289,12 +320,13 @@
 	}
 	.reply {
 		padding: 0.2em;
-		border: white 2px solid;
+		border: var(--border) var(--border-width) solid;
+		border-radius: var(--border-radius);
         margin-top: 0.1em;
 	}
     input:autofill, input:-webkit-autofill {
         background: transparent !important;
-		color: white !important;
+		color: var(--fg) !important;
     }
 	input:active, textarea:active, button:active {
 		background: #fff1;
@@ -304,9 +336,11 @@
 	}
 	input, textarea, button {
 		background: transparent;
-		color: white;
-		border: white 2px solid;
-		border-radius: 0;
+        background: var(--elem-bg);
+        padding: var(--button-padding);
+		color: var(--fg);
+		border: var(--border) var(--border-width) solid;
+		border-radius: var(--border-radius);
 	}
 	body#theme-3am .reply {
 		border-left: white 0.3em solid;
