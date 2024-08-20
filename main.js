@@ -210,7 +210,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			})
 		})
 	}
-	function onFormSubmit(ev) {
+	function onLoginFormSubmit(ev) {
 		ev.preventDefault();
 		// console.log(ev);
 		var username = document.getElementById("login-username").value
@@ -279,13 +279,13 @@ document.addEventListener("DOMContentLoaded", function() {
 		document.getElementById("post-content").value = ""
 	}
 	function update() {
-		if(page == 'home') {
-			updateHome();
-		} else {
+		if(page == 'chats') {
 			updateChat()
+		} else {
+			updateHome();
 		}
 	}
-	loginForm.addEventListener("submit", onFormSubmit)
+	loginForm.addEventListener("submit", onLoginFormSubmit)
 	document.getElementById("postForm").addEventListener("submit", onPostFormSubmit)
 	document.getElementById("refresh").addEventListener("click", function () {
 		posts.innerHTML = "<span></span>";
