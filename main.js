@@ -76,9 +76,15 @@ document.addEventListener("DOMContentLoaded", function() {
 				replyElem.classList.add("reply")
 				replyElem.appendChild(document.createElement("span"))
 				replyElem.children[0].classList.add("reply-username");
-				replyElem.children[0].innerHTML = escapeHTML(reply.u)
 				replyElem.appendChild(document.createElement("span"))
-				var replyText = reply.p
+				var replyText = ""
+				if(reply){
+					replyElem.children[0].innerHTML = escapeHTML(reply.u)
+					var replyText = reply.p
+				} else {
+					replyElem.children[0].innerHTML = escapeHTML("")
+					var replyText = "Deleted"
+				}
 				if(replyText.length > 40) {
 					replyText = replyText.slice(0, 47) + "..."
 				}
