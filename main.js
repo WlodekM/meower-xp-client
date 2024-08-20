@@ -10,7 +10,7 @@ var replies = [];
 if(!WebSocket) {
 	var supportsWss = true;
 } else {
-	var supportsWss = confirm("Does your browser support secure websockets (click YES/OK if on a modern browser, click no/cancel ONLY IF YOU ARE HOSTING A WSS->WS PROXY)");
+	var supportsWss = confirm("Does your browser support secure websockets\n(click YES/OK if on a modern browser, click no/cancel ONLY IF YOU ARE HOSTING A WSS TO WS PROXY)");
 }
 var autoRefresh;
 var autoRefreshEnabled = false;
