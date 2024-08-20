@@ -82,11 +82,16 @@ document.addEventListener("DOMContentLoaded", function() {
 	function reply(post) {
 		document.getElementById("post-content").value = "@" + post.u + " " + document.getElementById("post-content").value
 	}
-	// Add post to posts
+	/**
+	 * Add post to posts
+	 * @param {Object} post the post
+	 * @param {String} post._id post id
+	 */
 	function addPost(post) {
 		// console.log(post)
 		var elem = document.createElement("div")
 		elem.classList.add("post")
+		elem.id = 'post-' + post._id
 		//SECTION - post header
 		var header = document.createElement("div")
 		header.classList.add("post-header")
@@ -111,6 +116,8 @@ document.addEventListener("DOMContentLoaded", function() {
 		// Replies
 		if(post.reply_to) {
 			post.reply_to.forEach(reply => {
+				var replyLink = document.createElement('a')
+				replyLink.href = '#post-' + reply._id
 				var replyElem = document.createElement("div")
 				replyElem.classList.add("reply")
 				replyElem.appendChild(document.createElement("span"))
@@ -128,7 +135,8 @@ document.addEventListener("DOMContentLoaded", function() {
 					replyText = replyText.slice(0, 47) + "..."
 				}
 				replyElem.children[1].innerHTML = escapeHTML(replyText)
-				elem.appendChild(replyElem)
+				replyLink.appendChild(replyElem)
+				elem.appendChild(replyLink)
 			})
 		}
 		// The actual post content
