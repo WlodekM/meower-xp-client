@@ -7,10 +7,37 @@ var posts;
 var ulist;
 var user;
 var replies = [];
-var supportsWss = confirm("Does your browser support secure websockets (click yes if on a modern browser)");
+var supportsWss = confirm("Does your browser support secure websockets (click YES/OK if on a modern browser, click no/cancel ONLY IF YOU ARE HOSTING A WSS->WS PROXY)");
 var autoRefresh;
 var autoRefreshEnabled = false;
 var page = 'home';
+
+// Splash reference omg
+var splashes = [
+	'It runs on everything!',
+	'Made with pain and suffering',
+	'If you want to suggest PFPs, don\'t',
+	"Secretly helping yada turn everyone into catboys",
+	// "Hey guys its loser- I mean ${username} Here.",
+	"Only 50% stolen ideas!",
+	"Use https://worse.bettermeower.app/ for the best experience ever!.",
+	// "My coder = 👶🤓.",
+	// "Hello everyone its ${username} here back with another youtube video- Wait, i'm a meower bot.",
+	"https://tryitands.ee/.", // wont work :'(
+	"Guys pizzafox is totally pizzapizza72 (REAL 100% GONE WRONG).",
+	"18.283.211, is this you?",
+	// "Me when i need 3 nested requests for my whois command",
+	// "Hello, me am Steve. Do @Steve_Bot hel- wait i'm ${username}",
+	"the oldest anarchy server in minecraft",
+	"hey Vsauce michael here",
+	"Hi guys, this is mike. MXPC has been taken down for major security vunerabilites, sorry!",
+	"I have consumed 14 55 gallon drums of high-fructose corn syrup in the past 20 minutes.",
+	// "Guys, I'm not actually a bot! WlodekM3 trapped me in his basement and is forcing me to respond to your commands, help!",
+	// "Guys, I'm not actually a bot! WlodekM3 trapped me in his basement and is forcing me to respond to your commands, help!",
+	"400+ lines of pain",
+	"ඞ",
+	"soup"
+]
 
 var shiftHeld;
 
@@ -36,6 +63,7 @@ function escapeHTML(str) {
 document.addEventListener("DOMContentLoaded", function() {
 	posts = document.getElementById("posts")
 	loginForm = document.getElementById("loginForm")
+	document.getElementById('splash').innerHTML = escapeHTML(splashes[Math.floor(Math.round() * splashes.length)])
 	isLoggedIn = false;
 	if(supportsWss) {
 		ws = new WebSocket("wss://server.meower.org/")
