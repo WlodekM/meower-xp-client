@@ -54,23 +54,28 @@ document.addEventListener("DOMContentLoaded", function() {
 		// console.log(post)
 		var elem = document.createElement("div")
 		elem.classList.add("post")
+		//SECTION - post header
 		var header = document.createElement("div")
 		header.classList.add("post-header")
 		header.innerHTML = escapeHTML(post.u)
 		header.appendChild(document.createElement("div"))
-		header.childNodes[1].classList.add("right");
-		header.childNodes[1].appendChild(document.createElement("span"))
-		header.childNodes[1].children[0].classList.add("date");
-		header.childNodes[1].children[0].innerHTML = escapeHTML(new Date(post.t.e * 1000).toString());
-		header.childNodes[1].appendChild(document.createElement("button"))
-		header.childNodes[1].children[1].classList.add("mention_btn");
-		header.childNodes[1].children[1].addEventListener("click", function(){reply(post)})
-		header.childNodes[1].children[1].innerHTML = "mention"
+		header.lastChild.classList.add("right");
+		var postDate = document.createElement("span")
+		postDate.classList.add("date");
+		postDate.innerHTML = escapeHTML(new Date(post.t.e * 1000).toString());
+		var mentionButton = document.createElement("button");
+		mentionButton.classList.add("mention_btn");
+		mentionButton.addEventListener("click", function(){reply(post)})
+		mentionButton.innerHTML = "mention"
+		header.lastChild.appendChild(postDate)
+		header.lastChild.appendChild(mentionButton)
 		// header.childNodes[1].appendChild(document.createElement("button"))
 		// header.childNodes[1].children[1].classList.add("reply_btn");
 		// header.childNodes[1].children[1].addEventListener("click", ()=>addReply(post))
 		// header.childNodes[1].children[1].innerHTML = "reply"
+		//!SECTION
 		elem.appendChild(header)
+		// Replies
 		if(post.reply_to) {
 			post.reply_to.forEach(reply => {
 				var replyElem = document.createElement("div")
@@ -93,9 +98,11 @@ document.addEventListener("DOMContentLoaded", function() {
 				elem.appendChild(replyElem)
 			})
 		}
+		// The actual post content
 		var postContent = document.createElement("div")
 		postContent.innerHTML = escapeHTML(post.p)
 		elem.appendChild(postContent)
+		// attachments
 		if(post.attachments) {
 			post.attachments.forEach(attachment => {
 				var attElem = document.createElement("a")
