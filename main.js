@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	function reply(post) {
 		document.getElementById("post-content").value = "@" + post.u + " " + document.getElementById("post-content").value
 	}
+	// Add post to posts
 	function addPost(post) {
 		// console.log(post)
 		var elem = document.createElement("div")
@@ -80,10 +81,10 @@ document.addEventListener("DOMContentLoaded", function() {
 				var replyText = ""
 				if(reply){
 					replyElem.children[0].innerHTML = escapeHTML(reply.u)
-					var replyText = reply.p
+					replyText = reply.p
 				} else {
 					replyElem.children[0].innerHTML = escapeHTML("")
-					var replyText = "Deleted"
+					replyText = "Deleted"
 				}
 				if(replyText.length > 40) {
 					replyText = replyText.slice(0, 47) + "..."
