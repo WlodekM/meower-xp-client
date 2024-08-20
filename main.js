@@ -40,7 +40,8 @@ var splashes = [
 	// "Guys, I'm not actually a bot! WlodekM3 trapped me in his basement and is forcing me to respond to your commands, help!",
 	"400+ lines of pain",
 	"ඞ",
-	"soup"
+	"soup",
+	''
 ]
 
 var shiftHeld;
@@ -67,7 +68,7 @@ function escapeHTML(str) {
 document.addEventListener("DOMContentLoaded", function() {
 	posts = document.getElementById("posts")
 	loginForm = document.getElementById("loginForm")
-	document.getElementById('splash').innerHTML = escapeHTML(splashes[Math.floor(Math.round() * splashes.length)])
+	document.getElementById('splash').innerHTML = escapeHTML(splashes[Math.floor(Math.random() * (splashes.length - 1))])
 	isLoggedIn = false;
 	if(supportsWss) {
 		ws = new WebSocket("wss://server.meower.org/")
