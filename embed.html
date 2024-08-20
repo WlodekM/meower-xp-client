@@ -10,6 +10,22 @@
         <span id="error"></span>
     </form>
 </div>
+<div class="page signup">
+    <form id="registerForm" class="center">
+        <img src="./meowerlogo-white.svg" alt="mEOWER">
+        <input type="text" id="username" placeholder="Username...">
+        <br>
+        <input type="password" id="password" placeholder="Password...">
+        <br>
+        <input type="password" id="confirm" placeholder="Confirm password...">
+        <br>
+        <div id="hcaptcha-widget"></div>
+        <br>
+        <input type="submit" value="Sign up">
+        <br>
+        <span id="error"></span>
+    </form>
+</div>
 <div class="page main hidden">
     <div class="posts"></div>
     <div class="postForm">
@@ -18,18 +34,19 @@
     </div>
 </div>
 
+<script src="https://js.hcaptcha.com/1/api.js?render=explicit"></script>
 <script>
     const ws = new WebSocket("wss://server.meower.org/");
     let q = new URLSearchParams(document.location.search)
-    if(!q.has('invite')) throw new Error(alert('You have to provide a yaeb invite code, run @yaeb invite make in a gc to create one'))
-    if(!q.has('chatID')) throw new Error(alert('You have to provide the chat ID'))
-    if(q.has('theme')) document.body.parentElement.id = `theme-${q.get('theme')}`;
+    if (!q.has('invite')) throw new Error(alert('You have to provide a yaeb invite code, run @yaeb invite make in a gc to create one'))
+    if (!q.has('chatID')) throw new Error(alert('You have to provide the chat ID'))
+    if (q.has('theme')) document.body.parentElement.id = `theme-${q.get('theme')}`;
     const ID = q.get('chatID');
     const invite = q.get('invite')
-	function scrollToBottomOfElement(element) {
-		element.scrollTo(0, element.scrollHeight);
-	}
-    document.addEventListener("DOMContentLoaded", function() {
+    function scrollToBottomOfElement(element) {
+        element.scrollTo(0, element.scrollHeight);
+    }
+    document.addEventListener("DOMContentLoaded", function () {
         let shiftHeld = false;
 
         window.onkeydown = function (e) {
@@ -52,20 +69,20 @@
         let posts = document.querySelector('.posts');
         function goToPage(page) {
             document.querySelectorAll('.page').forEach(ele => {
-                if(!ele.classList.contains('hidden')) ele.classList.add('hidden')
+                if (!ele.classList.contains('hidden')) ele.classList.add('hidden')
             })
             document.querySelector(`.page.${page}`).classList.remove('hidden')
         }
         async function getChat() {
             let resp = await fetch(`https://api.meower.org/posts/${ID}/?autoget=1`, {
-                headers: {token: token}
+                headers: { token: token }
             })
             let json = await resp.json()
             json.autoget.reverse().forEach(post => addPost(post))
         }
         document.querySelector('#postBtn').addEventListener('click', function (e) {
             e.preventDefault()
-            if(!document.querySelector('#post').value) return;
+            if (!document.querySelector('#post').value) return;
             let resp = fetch(`https://api.meower.org/posts/${ID}/`, {
                 method: 'post',
                 headers: {
@@ -76,7 +93,7 @@
                     content: document.querySelector('#post').value
                 })
             })
-		    document.getElementById("post").value = ""
+            document.getElementById("post").value = ""
         })
         function addPost(post) {
             // console.log(post)
@@ -99,7 +116,7 @@
             // header.childNodes[1].children[1].addEventListener("click", ()=>addReply(post))
             // header.childNodes[1].children[1].innerHTML = "reply"
             elem.appendChild(header)
-            if(post.reply_to) {
+            if (post.reply_to) {
                 post.reply_to.forEach(reply => {
                     var replyElem = document.createElement("div")
                     replyElem.classList.add("reply")
@@ -108,7 +125,7 @@
                     replyElem.children[0].innerText = (reply.u)
                     replyElem.appendChild(document.createElement("span"))
                     var replyText = reply.p
-                    if(replyText.length > 40) {
+                    if (replyText.length > 40) {
                         replyText = replyText.slice(0, 47) + "..."
                     }
                     replyElem.children[1].innerText = (replyText)
@@ -118,7 +135,7 @@
             var postContent = document.createElement("div")
             postContent.innerText = (post.p)
             elem.appendChild(postContent)
-            if(post.attachments) {
+            if (post.attachments) {
                 post.attachments.forEach(attachment => {
                     var attElem = document.createElement("a")
                     attElem.appendChild(document.createElement("img"))
@@ -131,7 +148,7 @@
             }
             let scrolledToBottom = document.body.scrollTopMax == document.body.scrollTop;
             posts.appendChild(elem)
-            if(scrolledToBottom) scrollToBottomOfElement(document.body);
+            if (scrolledToBottom) scrollToBottomOfElement(document.body);
         }
         ws.onmessage = async function (ev) {
             var text = ev.data
@@ -141,12 +158,12 @@
                 parsed = JSON.parse(text)
             } catch (e) {
             }
-            if(!parsed.val) return;
-            if(parsed.cmd == "ulist") {
+            if (!parsed.val) return;
+            if (parsed.cmd == "ulist") {
                 ulist = parsed.val.split(";");
                 return;
             };
-            if(parsed.val && parsed.val.mode == 'auth') {
+            if (parsed.val && parsed.val.mode == 'auth') {
                 document.getElementById("error").innerText = "";
                 token = parsed.val.payload.token
                 isLoggedIn = true;
@@ -156,8 +173,8 @@
                         username: username
                     }
                 })).json()
-                if(!chatsJSON.autoget.find(c => c._id == ID)) {
-                    if(!ulist.includes('yaeb')) return;
+                if (!chatsJSON.autoget.find(c => c._id == ID)) {
+                    if (!ulist.includes('yaeb')) return;
                     let res = await fetch(`https://api.meower.org/users/yaeb/dm`, {
                         headers: {
                             token: token,
@@ -170,7 +187,7 @@
                             "content-type": "application/json"
                         },
                         body: JSON.stringify({
-                            content: '@yaeb invite join '+invite
+                            content: '@yaeb invite join ' + invite
                         })
                     })
                 } else {
@@ -180,16 +197,16 @@
                 }
                 return
             }
-            if(!isLoggedIn) return;
-            if(parsed.cmd == 'create_chat' && parsed.val._id == ID) {
+            if (!isLoggedIn) return;
+            if (parsed.cmd == 'create_chat' && parsed.val._id == ID) {
                 goToPage('main')
                 getChat();
                 return;
             }
             // console.log('is logg in', parsed)
-            if(parsed.val.type != 1) return;
+            if (parsed.val.type != 1) return;
             // console.log('is post')
-            if(parsed.val.post_origin != ID) return;
+            if (parsed.val.post_origin != ID) return;
             // console.log('is in gc')
             addPost(parsed.val)
         }
@@ -199,17 +216,17 @@
             const password = document.querySelector('#password').value;
             document.getElementById("error").innerText = "Loading...";
             const resp = await fetch("https://api.meower.org/auth/login/", {
-				"method":"POST",
-				"headers": {
-					"content-type": "application/json"
-				},
-				"body": JSON.stringify({
-					"username":username,
-					"password":password
-				})
-			});
+                "method": "POST",
+                "headers": {
+                    "content-type": "application/json"
+                },
+                "body": JSON.stringify({
+                    "username": username,
+                    "password": password
+                })
+            });
             const json = await resp.json()
-            if(json.error) {
+            if (json.error) {
                 document.getElementById("error").style = "";
                 document.getElementById("error").innerText = "Error: " + json.type;
                 return;
@@ -232,9 +249,28 @@
                 !shiftHeld
             ) {
                 event.preventDefault();
-                if(!submitBtn.disabled) submitBtn.click();
+                if (!submitBtn.disabled) submitBtn.click();
             }
         })
+        function doCaptchaTHingy() {
+            fetch("https://api.meower.org/").then(resp => resp.json().then(resp => {
+                if (resp.captcha.enabled) {
+                    hcaptcha.render("hcaptcha-widget", {
+                        sitekey: resp.captcha.sitekey,
+                        theme: getComputedStyle(document.body).getPropertyValue('--color-scheme'),
+                        callback: (token) => {
+                            mdbt.innerHTML = `
+                                <button class="modal-back-btn" onclick="toggleLogin(true);signup(document.getElementById('userinput').value, document.getElementById('passinput').value, '${token}')" aria-label="log in">${lang().action.signup}</button>
+                                `;
+                        },
+                    });
+                } else {
+                    mdbt.innerHTML = `
+                        <button class="modal-back-btn" onclick="toggleLogin(true);signup(document.getElementById('userinput').value, document.getElementById('passinput').value, '')" aria-label="log in">${lang().action.signup}</button>
+                        `;
+                }
+            }));
+        }
     })
 </script>
 
@@ -248,6 +284,7 @@
         --border-radius: 0;
         --button-padding: 0.35em;
     }
+
     :root#theme-meo-like {
         --bg: #1f1d29;
         --elem-bg: #2f2c3d;
@@ -257,6 +294,7 @@
         --border-radius: 6px;
         --button-padding: 0.75em;
     }
+
     #post {
         resize: none;
         margin: 0;
@@ -264,11 +302,13 @@
         max-width: none;
         width: 100%;
     }
+
     .postForm {
         display: flex;
         margin-bottom: 0.5em;
         gap: 0.5em;
     }
+
     .center {
         display: flex;
         flex-direction: column;
@@ -276,11 +316,13 @@
         align-items: center;
         gap: 0.1em;
     }
+
     .center img {
         margin-bottom: 1em;
         width: 75%;
         max-width: 250px;
     }
+
     body {
         margin: 0;
         background: var(--bg);
@@ -289,79 +331,106 @@
         max-height: 100vh;
         overflow: auto;
     }
+
     .page.hidden {
         display: none;
     }
+
     .page {
         width: calc(100% - 2em);
         height: calc(100% - 2em);
         padding: 1em;
     }
+
     .page.main {
         overflow: auto;
     }
-	.post {
-		margin-bottom: 0.5em;
-		word-wrap: break-word;
-		word-break: break-all;
+
+    .post {
+        margin-bottom: 0.5em;
+        word-wrap: break-word;
+        word-break: break-all;
         border: var(--border-width) var(--border) solid;
         padding: 0.5em;
-		border-radius: var(--border-radius);
+        border-radius: var(--border-radius);
         background: var(--elem-bg);
-	}
-	.post-image {
-		max-width: 75%
-	}
-	.post-header, .reply-username {
-		font-weight: bold
-	}
-	.reply-username {
-		margin-right: 0.5em
-	}
-	.reply {
-		padding: 0.2em;
-		border: var(--border) var(--border-width) solid;
-		border-radius: var(--border-radius);
-        margin-top: 0.1em;
-	}
-    input:autofill, input:-webkit-autofill {
-        background: transparent !important;
-		color: var(--fg) !important;
     }
-	input:active, textarea:active, button:active {
-		background: #fff1;
-	}
-	input:hover, textarea:hover, button:hover {
-		background: #fff3;
-	}
-	input, textarea, button {
-		background: transparent;
+
+    .post-image {
+        max-width: 75%
+    }
+
+    .post-header,
+    .reply-username {
+        font-weight: bold
+    }
+
+    .reply-username {
+        margin-right: 0.5em
+    }
+
+    .reply {
+        padding: 0.2em;
+        border: var(--border) var(--border-width) solid;
+        border-radius: var(--border-radius);
+        margin-top: 0.1em;
+    }
+
+    input:autofill,
+    input:-webkit-autofill {
+        background: transparent !important;
+        color: var(--fg) !important;
+    }
+
+    input:active,
+    textarea:active,
+    button:active {
+        background: #fff1;
+    }
+
+    input:hover,
+    textarea:hover,
+    button:hover {
+        background: #fff3;
+    }
+
+    input,
+    textarea,
+    button {
+        background: transparent;
         background: var(--elem-bg);
         padding: var(--button-padding);
-		color: var(--fg);
-		border: var(--border) var(--border-width) solid;
-		border-radius: var(--border-radius);
-	}
-	body#theme-3am .reply {
-		border-left: white 0.3em solid;
-		background: hsla(0,100%,100%,0.1);
-	}
-	body#theme-3am {
-		background: black;
-		color: white;
-	}
-	#theme-3am input, #theme-3am textarea, #theme-3am button {
-		background: #4c4c5a;
-		color: white;
-		border: #b0b0c5 2px solid;
-		border-radius: 0.25em;
-	}
-	.post-header {
-		display: flex;
-		justify-content: space-between;
-	}
-	.date {
-		font-weight: initial;
-		font-style: italic;
-	}
+        color: var(--fg);
+        border: var(--border) var(--border-width) solid;
+        border-radius: var(--border-radius);
+    }
+
+    body#theme-3am .reply {
+        border-left: white 0.3em solid;
+        background: hsla(0, 100%, 100%, 0.1);
+    }
+
+    body#theme-3am {
+        background: black;
+        color: white;
+    }
+
+    #theme-3am input,
+    #theme-3am textarea,
+    #theme-3am button {
+        background: #4c4c5a;
+        color: white;
+        border: #b0b0c5 2px solid;
+        border-radius: 0.25em;
+    }
+
+    .post-header {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .date {
+        font-weight: initial;
+        font-style: italic;
+    }
 </style>

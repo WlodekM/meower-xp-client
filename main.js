@@ -116,6 +116,10 @@ document.addEventListener("DOMContentLoaded", function() {
 			document.getElementById("ulist").innerHTML = `There are currently ${ulist.length} users online<br>${escapeHTML(ulist.join(", "))}`
 			return;
 		};
+		if(parsed.val != undefined && parsed.val.mode == "auth") {
+			token = parsed.val.payload.token
+			return;
+		};
 		if(!isLoggedIn) return;
 		if(parsed.val.mode != 1) return;
 		console.debug(parsed.val.post_origin != page)
@@ -156,13 +160,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			})
 		})
 	}
-	function onFormSubmit(ev) {
-		ev.preventDefault();
-		// console.log(ev);
-		var username = document.getElementById("login-username").value
-		var password = document.getElementById("login-password").value
-		document.getElementById("error").style = "display: none";
-		document.getElementById("loading").style = ""
+	function doLogin(username, password, cb) {
 		var res = fetch(apiURL + "auth/login/", {
 				"method":"POST",
 				"headers": {
@@ -194,14 +192,25 @@ document.addEventListener("DOMContentLoaded", function() {
 						},
 					}));
 				}
-				loginForm.style = "display: none"
-				document.getElementById("ulist").style = ""
-				document.getElementById("postForm").style = ""
-				document.getElementById("controls").style = ""
-				document.getElementById("auto-refresh").addEventListener("click", toggleRefresh)
-				document.title = "MXPC - Home"
-				updateHome()
+				cb()
 			})
+		})
+	}
+	function onFormSubmit(ev) {
+		ev.preventDefault();
+		// console.log(ev);
+		var username = document.getElementById("login-username").value
+		var password = document.getElementById("login-password").value
+		document.getElementById("error").style = "display: none";
+		document.getElementById("loading").style = ""
+		doLogin(username, password, function () {
+			loginForm.style = "display: none"
+			document.getElementById("ulist").style = ""
+			document.getElementById("postForm").style = ""
+			document.getElementById("controls").style = ""
+			document.getElementById("auto-refresh").addEventListener("click", toggleRefresh)
+			document.title = "MXPC - Home"
+			updateHome()
 		})
 	}
 	function toggleRefresh() {
