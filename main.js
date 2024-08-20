@@ -151,28 +151,32 @@ document.addEventListener("DOMContentLoaded", function() {
 	}
 	function updateHome() {
 		document.getElementById("loading").style = ""
-		var res;
-		if(page == "home") {
-			res = fetch(apiURL + "home?autoget=1", {
-				"method":"GET"
-			});
-		} else {
-			res = fetch(apiURL + "posts/" + page, {
-				"method":"GET",
-				"headers": {
-					"token": token
-				}
-			});
-		}
-		res.then(function (resp) {
-			resp.json().then(function (json) {
-				document.getElementById("loading").style = "display: none"
-				// console.log(json)
-				json.autoget.reverse().forEach(post => addPost(post))
-				// var postsHtml = json.autoget.map(post => `<div class="post">${escapeHTML(post.u)}: ${escapeHTML(post.p)}</div>`);
-				// document.getElementById("posts").innerHTML = postsHtml.join("\n")
+		fetch(apiURL + 'ulist').then(ures => ures.json().then(function (ulistJson) {
+			ulist = ulistJson.autoget.map(function (a) {return a._id});
+			document.getElementById("ulist").innerHTML = `There are currently ${ulist.length} users online<br>${escapeHTML(ulist.join(", "))}`
+			var res;
+			if(page == "home") {
+				res = fetch(apiURL + "home?autoget=1", {
+					"method":"GET"
+				});
+			} else {
+				res = fetch(apiURL + "posts/" + page, {
+					"method":"GET",
+					"headers": {
+						"token": token
+					}
+				});
+			}
+			res.then(function (resp) {
+				resp.json().then(function (json) {
+					document.getElementById("loading").style = "display: none"
+					// console.log(json)
+					json.autoget.reverse().forEach(post => addPost(post))
+					// var postsHtml = json.autoget.map(post => `<div class="post">${escapeHTML(post.u)}: ${escapeHTML(post.p)}</div>`);
+					// document.getElementById("posts").innerHTML = postsHtml.join("\n")
+				})
 			})
-		})
+		}))
 	}
 	function doLogin(username, password, cb) {
 		var res = fetch(apiURL + "auth/login/", {
