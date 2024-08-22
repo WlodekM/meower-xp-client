@@ -210,6 +210,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		document.getElementById("loading").style = "display: none"
 	}
 	function updateHome() {
+		document.getElementById("chat").style = ""
 		document.getElementById("loading").style = ""
 		fetch(apiURL + 'ulist').then(ures => ures.json().then(function (ulistJson) {
 			ulist = ulistJson.autoget.map(function (a) {return a._id});
@@ -408,6 +409,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		posts.insertBefore(elem, posts.firstChild)
 	}
 	function updateChat() {
+		document.getElementById("chat").style = "display: none"
 		enableLoadingText()
 		fetch(apiURL + "chats/", {
 			"method":"GET",
@@ -419,7 +421,7 @@ document.addEventListener("DOMContentLoaded", function() {
 				if(Array.prototype.sort) {
 					json.autoget = json.autoget.sort((a, b) => {
 						return b.last_active - a.last_active;
-					});
+					}).reverse();
 				}
 				for (let i = 0; i < json.autoget.length; i++) {
 					addChat(json.autoget[i]);
