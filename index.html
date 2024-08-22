@@ -9,31 +9,65 @@
 </head>
 
 <body id="theme-3am">
-	<h1>Meower XP client</h1> <span id="closed" style="display: none;">DISCONNECTED</span>
-	<h2 id="splash"></h2>
-	<form id="loginForm">
-		<input type="text" id="login-username">
-		<input type="password" id="login-password">
-		<input type="submit">
-	</form>
-	<div id="error" style="display: none">Error</div>
-	<div id="ulist" style="display: none"></div>
-	<form id="postForm" style="display: none">
-		<textarea type="text" id="post-content" style="width: 100%"></textarea>
-		<input type="submit" id="post-submit" value="Post">
-	</form>
-	<div id="controls" style="display: none">
-		<hr>
-		<button id="refresh">Refresh posts</button>
-		<button id="auto-refresh">Auto refresh: OFF</button>
-		<button id="home">Home</button>
-		<button id="chats">Chats</button>
-	</div>
-	<hr>
-	<div id="loading" style="display: none">Loading...</div>
-	<div id="posts">
-		<span></span>
-	</div>
+	<table>
+		<tr>
+			<th class="title">
+				<!-- title -->
+				<h1>Meower XP client</h1> - <h2 id="splash"></h2>
+				<span id="closed" style="display: none;"><br>DISCONNECTED</span>
+			</th>
+		</tr>
+		<tr>
+			<td>
+				<fieldset class="login" id="loginContainer">
+					<legend>Log in</legend>
+					<form id="loginForm">
+						<input type="text" id="login-username">
+						<br>
+						<input type="password" id="login-password">
+						<br>
+						<input type="submit">
+					</form>
+					<br>
+					<div id="error" style="display: none">Error</div>
+				</fieldset>
+			</td>
+		</tr>
+		<tr id="controls" style="display: none">
+			<td>
+				<fieldset>
+					<legend>Navigation</legend>
+					<button id="refresh">Refresh posts</button>
+					<button id="auto-refresh">Auto refresh: OFF</button>
+					<button id="home">Home</button>
+					<button id="chats">Chats</button>
+				</fieldset>
+			</td>
+		</tr>
+		<tr>
+			<td id="chat" style="display: none;">
+				<fieldset>
+					<legend>Post</legend>
+					<div id="ulist" style="display: none"></div>
+					<form id="postForm" style="display: none">
+						<textarea type="text" id="post-content" style="width: 100%"></textarea>
+						<input type="submit" id="post-submit" value="Post">
+					</form>
+				</fieldset>
+			</td>
+		</tr>
+		<tr>
+			<td id="postsContainer" style="display: none;">
+				<fieldset>
+					<legend id="pageTitle">Home</legend>
+					<div id="loading" style="display: none">Loading...</div>
+					<div id="posts">
+						<span></span>
+					</div>
+				</fieldset>
+			</td>
+		</tr>
+	</table>
 </body>
 
 <style>
@@ -41,6 +75,21 @@
 		display: flex;
 		flex-direction: column-reverse
 	}*/
+	.post img {
+		max-width: 30%;
+		max-height: 75%;
+	}
+	.login {
+		margin-inline: auto;
+		width: fit-content;
+		align-items: center;
+	}
+	tr, table {
+		width: 100%;
+	}
+	.title * {
+		display: inline-block;
+	}
 	.post {
 		margin-bottom: 1em;
 		word-wrap: break-word;

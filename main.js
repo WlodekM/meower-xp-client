@@ -61,6 +61,25 @@ window.onmousemove = function (e) {
 	shiftHeld = e.shiftKey;
 }
 
+// https://stackoverflow.com/a/3890175
+function linkify(inputText) {
+    var replacedText, replacePattern1, replacePattern2, replacePattern3;
+
+    //URLs starting with http://, https://, or ftp://
+    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    replacedText = inputText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
+
+    //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
+    replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+    replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
+
+    //Change email addresses to mailto:: links.
+    replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+    replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
+
+    return replacedText;
+}
+
 function escapeHTML(str) {
 	return str.replace(/\&/g, '&amp;').replace(/\</g, '&lt;').replace(/\n/g, '<br>')
 }
@@ -141,7 +160,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		}
 		// The actual post content
 		var postContent = document.createElement("div")
-		postContent.innerHTML = escapeHTML(post.p)
+		postContent.innerHTML = linkify(escapeHTML(post.p))
 		elem.appendChild(postContent)
 		// attachments
 		if(post.attachments) {
@@ -263,10 +282,12 @@ document.addEventListener("DOMContentLoaded", function() {
 		document.getElementById("error").style = "display: none";
 		document.getElementById("loading").style = ""
 		doLogin(username, password, function () {
-			loginForm.style = "display: none"
+			document.getElementById("loginContainer").style = "display: none"
 			document.getElementById("ulist").style = ""
 			document.getElementById("postForm").style = ""
 			document.getElementById("controls").style = ""
+			document.getElementById("chat").style = ""
+			document.getElementById("postsContainer").style = ""
 			document.getElementById("auto-refresh").addEventListener("click", toggleRefresh)
 			document.title = "MXPC - Home"
 			updateHome()
@@ -339,6 +360,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	document.getElementById("home").addEventListener("click", function () {
 		posts.innerHTML = "<span></span>";
 		page = "home";
+		document.getElementById('pageTitle').innerHTML = escapeHTML('Home')
 		updateHome();
 		document.title = "MXPC - Home"
 	})
@@ -367,16 +389,17 @@ document.addEventListener("DOMContentLoaded", function() {
 		header.classList.add("post-header")
 		header.classList.add("chat-header")
 		if(chat.type == 1) {
-			header.innerHTML = escapeHTML(chat.members.filter(function (member) {return member != user._id})[0])
-			header.innerHTML += "<span style=\"color: gray;font-size: 0.5em;\">" + escapeHTML(chat._id) + "</span>"
+			header.innerHTML = 'DM with ' + escapeHTML(chat.members.filter(function (member) {return member != user._id})[0])
 		} else {
 			header.innerHTML = escapeHTML(chat.nickname)
 		}
+		header.innerHTML += "<span style=\"color: gray;font-size: 0.5em;\">" + escapeHTML(chat._id) + "</span>"
 		elem.appendChild(header)
-		var postContent = document.createElement("div")
+		var postContent = document.createElement("button")
 		postContent.innerHTML = escapeHTML('go to chat')
 		postContent.addEventListener('click', function () {
 			page = chat._id;
+			document.getElementById('pageTitle').innerHTML = escapeHTML('Chat')
 			posts.innerHTML = "<span></span>";
 			updateHome();
 		})
@@ -393,6 +416,11 @@ document.addEventListener("DOMContentLoaded", function() {
 			}
 		}).then(function (resp) {
 			resp.json().then(function (json) {
+				if(Array.prototype.sort) {
+					json.autoget = json.autoget.sort((a, b) => {
+						return b.last_active - a.last_active;
+					});
+				}
 				for (let i = 0; i < json.autoget.length; i++) {
 					addChat(json.autoget[i]);
 				}
@@ -402,6 +430,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	}
 	document.getElementById("chats").addEventListener("click", function () {
 		posts.innerHTML = "<span></span>";
+		document.getElementById('pageTitle').innerHTML = escapeHTML('Chats')
 		page = "chats";
 		updateChat()
 	})
