@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	document.getElementById('splash').innerHTML = escapeHTML(splashes[Math.floor(Math.random() * (splashes.length - 1))])
 	isLoggedIn = false;
 	if(supportsWss) {
-		ws = new WebSocket("wss://server.meower.org/")
+		ws = new WebSocket("wss://api.meower.org/v0/cloudlink?v=0")
 	} else {
 		ws = new WebSocket("ws://192.168.56.1:8080/")
 	}
