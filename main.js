@@ -38,7 +38,7 @@ var splashes = [
 	"I have consumed 14 55 gallon drums of high-fructose corn syrup in the past 20 minutes.",
 	// "Guys, I'm not actually a bot! WlodekM3 trapped me in his basement and is forcing me to respond to your commands, help!",
 	// "Guys, I'm not actually a bot! WlodekM3 trapped me in his basement and is forcing me to respond to your commands, help!",
-	"400+ lines of pain",
+	"600+ lines of pain",
 	"ඞ",
 	"soup",
 	''
@@ -84,15 +84,19 @@ function escapeHTML(str) {
 	return str.replace(/\&/g, '&amp;').replace(/\</g, '&lt;').replace(/\n/g, '<br>')
 }
 
+function formatDate(d) {
+	return d.getHours() + ":" + d.getMinutes() + " " + d.getDate() + "." + (d.getMonth() + 1) + "." + d.getFullYear()
+}
+
 document.addEventListener("DOMContentLoaded", function() {
 	posts = document.getElementById("posts")
 	loginForm = document.getElementById("loginForm")
 	document.getElementById('splash').innerHTML = escapeHTML(splashes[Math.floor(Math.random() * (splashes.length - 1))])
 	isLoggedIn = false;
 	if(supportsWss) {
-		ws = new WebSocket("wss://api.meower.org/v0/cloudlink?v=0")
+		ws = new WebSocket("wss://api.meower.org/v0/cloudlink?v=0") // splecify v0, add support for v1 later
 	} else {
-		ws = new WebSocket("ws://192.168.56.1:8080/")
+		ws = new WebSocket("ws://127.0.0.1:8080/")
 	}
 	apiURL = "https://api.meower.org/";
 	function addReply(post) {
@@ -119,7 +123,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		header.lastChild.classList.add("right");
 		var postDate = document.createElement("span")
 		postDate.classList.add("date");
-		postDate.innerHTML = escapeHTML(new Date(post.t.e * 1000).toString());
+		postDate.innerHTML = escapeHTML(formatDate(new Date(post.t.e * 1000)));
 		var mentionButton = document.createElement("button");
 		mentionButton.classList.add("mention_btn");
 		mentionButton.addEventListener("click", function(){reply(post)})
@@ -289,6 +293,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			document.getElementById("controls").style = ""
 			document.getElementById("chat").style = ""
 			document.getElementById("postsContainer").style = ""
+			document.getElementById("ulist-container").style = ""
 			document.getElementById("auto-refresh").addEventListener("click", toggleRefresh)
 			document.title = "MXPC - Home"
 			updateHome()

@@ -48,11 +48,18 @@
 			<td id="chat" style="display: none;">
 				<fieldset>
 					<legend>Post</legend>
-					<div id="ulist" style="display: none"></div>
 					<form id="postForm" style="display: none">
 						<textarea type="text" id="post-content" style="width: 100%"></textarea>
 						<input type="submit" id="post-submit" value="Post">
 					</form>
+				</fieldset>
+			</td>
+		</tr>
+		<tr id="ulist-container" style="display: none">
+			<td style="vertical-align: baseline">
+				<fieldset style="height: 100%;">
+					<legend>Userlist</legend>
+					<div id="ulist" style="display: none"></div>
 				</fieldset>
 			</td>
 		</tr>
@@ -75,6 +82,9 @@
 		display: flex;
 		flex-direction: column-reverse
 	}*/
+	fieldset {
+		border-color: white;
+	}
 	.post img {
 		max-width: 30%;
 		max-height: 75%;
@@ -94,6 +104,13 @@
 		margin-bottom: 1em;
 		word-wrap: break-word;
 		word-break: break-all;
+		display: block;
+		/* margin-inline: 2px; */
+		padding-block: 0.35em 0.625em;
+		padding-inline: 0.75em;
+		border: 2px groove white;
+		min-inline-size: min-content;
+		margin-bottom: 1em;
 	}
 	.post-image {
 		max-width: 75%
@@ -119,6 +136,7 @@
 	}
 	body#theme-3am {
 		background: black;
+		color-scheme: dark;
 		color: white;
 	}
 	#postForm {

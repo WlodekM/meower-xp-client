@@ -3,8 +3,7 @@ import WebSocket from 'ws';
 const server = new WebSocket.Server({ port: 8080 });
 
 server.on('connection', (clientSocket) => {
-    // console.log('conn')
-    const targetSocket = new WebSocket('wss://server.meower.org'); // Replace with your target WebSocket server URL
+    const targetSocket = new WebSocket('wss://server.meower.org');
 
     targetSocket.on('open', () => {
         console.log("Connected to target WebSocket server");
@@ -37,4 +36,4 @@ server.on('connection', (clientSocket) => {
     });
 });
 
-console.log("WebSocket proxy server is running on ws://localhost:8080");
+console.log(`WebSocket proxy server is running on ws://localhost:${server.options.port}`);
