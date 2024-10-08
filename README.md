@@ -36,3 +36,6 @@ node index.js
 
 To open the client go to [the client's website](https://wlodekm.github.io/meower-xp-client/) or open the index.html file in your browser (might not work)
 
+## Reccomended IDE setup
+
+Windows XP SP2 with notepad++ (whatever version works, doesn't matter that much) and firefox 50.0

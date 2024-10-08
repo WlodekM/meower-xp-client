@@ -22,22 +22,15 @@ var splashes = [
 	'Made with pain and suffering',
 	'If you want to suggest PFPs, don\'t',
 	"Secretly helping yada turn everyone into catboys",
-	// "Hey guys its loser- I mean ${username} Here.",
 	"Only 50% stolen ideas!",
 	"Use https://worse.bettermeower.app/ for the best experience ever!.",
-	// "My coder = 👶🤓.",
-	// "Hello everyone its ${username} here back with another youtube video- Wait, i'm a meower bot.",
-	"https://tryitands.ee/.", // wont work :'(
+	"https://tryitands.ee/.",
 	"Guys pizzafox is totally pizzapizza72 (REAL 100% GONE WRONG).",
 	"18.283.211, is this you?",
-	// "Me when i need 3 nested requests for my whois command",
-	// "Hello, me am Steve. Do @Steve_Bot hel- wait i'm ${username}",
 	"the oldest anarchy server in minecraft",
 	"hey Vsauce michael here",
 	"Hi guys, this is mike. MXPC has been taken down for major security vunerabilites, sorry!",
 	"I have consumed 14 55 gallon drums of high-fructose corn syrup in the past 20 minutes.",
-	// "Guys, I'm not actually a bot! WlodekM3 trapped me in his basement and is forcing me to respond to your commands, help!",
-	// "Guys, I'm not actually a bot! WlodekM3 trapped me in his basement and is forcing me to respond to your commands, help!",
 	"600+ lines of pain",
 	"ඞ",
 	"soup",
@@ -112,72 +105,59 @@ document.addEventListener("DOMContentLoaded", function() {
 	 */
 	function addPost(post) {
 		// console.log(post)
-		var elem = document.createElement("div")
-		elem.classList.add("post")
-		elem.id = 'post-' + post._id
-		//SECTION - post header
-		var header = document.createElement("div")
-		header.classList.add("post-header")
-		header.innerHTML = escapeHTML(post.u)
-		header.appendChild(document.createElement("div"))
-		header.lastChild.classList.add("right");
-		var postDate = document.createElement("span")
-		postDate.classList.add("date");
-		postDate.innerHTML = escapeHTML(formatDate(new Date(post.t.e * 1000)));
-		var mentionButton = document.createElement("button");
-		mentionButton.classList.add("mention_btn");
-		mentionButton.addEventListener("click", function(){reply(post)})
-		mentionButton.innerHTML = "mention"
-		header.lastChild.appendChild(postDate)
-		header.lastChild.appendChild(mentionButton)
-		// header.childNodes[1].appendChild(document.createElement("button"))
-		// header.childNodes[1].children[1].classList.add("reply_btn");
-		// header.childNodes[1].children[1].addEventListener("click", ()=>addReply(post))
-		// header.childNodes[1].children[1].innerHTML = "reply"
-		//!SECTION
-		elem.appendChild(header)
-		// Replies
-		if(post.reply_to) {
-			post.reply_to.forEach(reply => {
-				var replyLink = document.createElement('a')
-				replyLink.href = '#post-' + reply._id
-				var replyElem = document.createElement("div")
-				replyElem.classList.add("reply")
-				replyElem.appendChild(document.createElement("span"))
-				replyElem.children[0].classList.add("reply-username");
-				replyElem.appendChild(document.createElement("span"))
-				var replyText = ""
-				if(reply){
-					replyElem.children[0].innerHTML = escapeHTML(reply.u)
-					replyText = reply.p
-				} else {
-					replyElem.children[0].innerHTML = escapeHTML("")
-					replyText = "Deleted"
-				}
-				if(replyText.length > 40) {
-					replyText = replyText.slice(0, 47) + "..."
-				}
-				replyElem.children[1].innerHTML = escapeHTML(replyText)
-				replyLink.appendChild(replyElem)
-				elem.appendChild(replyLink)
-			})
-		}
-		// The actual post content
-		var postContent = document.createElement("div")
-		postContent.innerHTML = linkify(escapeHTML(post.p))
-		elem.appendChild(postContent)
-		// attachments
-		if(post.attachments) {
-			post.attachments.forEach(attachment => {
-				var attElem = document.createElement("a")
-				attElem.appendChild(document.createElement("img"))
-				attElem.children[0].classList.add("post-image");
-				attElem.children[0].alt = attachment.filename;
-				attElem.children[0].src = `https://uploads.meower.org/attachments/${attachment.id}/${attachment.filename}`
-				attElem.href = `https://uploads.meower.org/attachments/${attachment.id}/${attachment.filename}`
-				elem.appendChild(attElem)
-			})
-		}
+		const elem =
+		make("div")
+			.class("post")
+			.attr("id", 'post-' + post._id)
+			.child("img")
+				.class("post-pfp")
+				.attr("src", 'https://uploads.meower.org/icons/' + post.author.avatar)
+				.attr("float", 'left')
+				.up()
+			.child("div")
+				.class("post-header")
+				.html(escapeHTML(post.u))
+				.child("div")
+					.class("right")
+					.child("span")
+						.class("date")
+						.html(escapeHTML(formatDate(new Date(post.t.e * 1000))))
+						.up()
+					.child("button")
+						.class("mention_btn")
+						.ev("click", function(){reply(post)})
+						.html("mention")
+						.up()
+					.up()
+				.up()
+			.for(post.reply_to || [], reply => 
+					make("a")
+						.attr("id", '#post-' + reply._id)
+						.child("div")
+							.class("reply")
+							.child("span")
+								.class("reply-username")
+								.html(reply ? escapeHTML(reply.u) : "")
+								.up()
+							.child("span")
+								.html(reply ? escapeHTML(reply.p).slice(0, 47) + "..." : "Deleted")
+								.up()
+							.up()
+			)
+			.child("div")
+				.html(linkify(escapeHTML(post.p)))
+				.up()
+			.for(post.attachments || [], attachment => 
+					make("a")
+						.attr("href", `https://uploads.meower.org/attachments/${attachment.id}/${attachment.filename}`)
+						.attr("target", "_blank")
+						.child("img")
+							.class("post-image")
+							.attr("src", `https://uploads.meower.org/attachments/${attachment.id}/${attachment.filename}?preview`)
+							.attr("alt", attachment.filename)
+							.up()
+			);
+		// console.debug(elem)
 		posts.insertBefore(elem, posts.firstChild)
 	}
 	ws.onmessage = function(data) {

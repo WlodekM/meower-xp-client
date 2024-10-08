@@ -1,0 +1,53 @@
+<h1>this page was made to test the html builder lib used for making posts and possibly reply ui in future</h1>
+
+<script src="./HTMLbuilder.js"></script>
+<script>
+    function gen() {
+        return make("div")
+                .class("main")
+                .child("span")
+                    .html("elem 1")
+                    .up()
+                .child("ul")
+                    .child("li")
+                        .html("elem 2a")
+                        .up()
+                    .child("li")
+                        .html("elem 2b")
+                        .up()
+                    .up()
+                .child("img")
+                    .attr("src", "https://nekoweb.org/static/assets/burger.gif")
+                    .up()
+                .child("br").up()
+                .child("button")
+                    .html("count: 0")
+                    .ev("click", function () {
+                        if(!this.count) this.count = 0;
+                        this.count++;
+                        this.html("count: " + this.count)
+                    })
+                    .up()
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        document.body.appendChild(gen())
+        document.body.appendChild(
+            make("div")
+                .child("span")
+                    .html("Code used to generate this:")
+                    .up()
+                .child("br").up()
+                .child("pre")
+                    .html(gen.toString().replaceAll(" ", "&nbsp;").replaceAll("<", "&lt;").replaceAll("\n", "<br>"))
+                .up()
+        )
+    })
+</script>
+
+<style>
+    .main {
+        padding: 1em;
+        border: 1px black solid;
+        width: fit-content;
+    }
+</style>
