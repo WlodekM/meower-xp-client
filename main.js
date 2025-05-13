@@ -10,7 +10,7 @@ var replies = [];
 if(!WebSocket) {
 	var supportsWss = true;
 } else {
-	var supportsWss = confirm("Does your browser support secure websockets\n(click YES/OK if on a modern browser, click no/cancel ONLY IF YOU ARE HOSTING A WSS TO WS PROXY)");
+	var supportsWss = confirm("Does your browser support secure websockets (if unsure click yes/OK, unless youre on an old browser)");
 }
 var autoRefresh;
 var autoRefreshEnabled = false;
@@ -23,13 +23,13 @@ var splashes = [
 	'If you want to suggest PFPs, don\'t',
 	"Secretly helping yada turn everyone into catboys",
 	"Only 50% stolen ideas!",
-	"Use https://worse.bettermeower.app/ for the best experience ever!.",
+	// "Use https://worse.bettermeower.app/ for the best experience ever!.",
 	"https://tryitands.ee/.",
 	"Guys pizzafox is totally pizzapizza72 (REAL 100% GONE WRONG).",
 	"18.283.211, is this you?",
 	"the oldest anarchy server in minecraft",
 	"hey Vsauce michael here",
-	"Hi guys, this is mike. MXPC has been taken down for major security vunerabilites, sorry!",
+	"Hi guys, this is mike. MXPC has been taken down for major security vulnerabilities, sorry!",
 	"I have consumed 14 55 gallon drums of high-fructose corn syrup in the past 20 minutes.",
 	"600+ lines of pain",
 	"ඞ",
@@ -81,22 +81,27 @@ function formatDate(d) {
 	return d.getHours() + ":" + d.getMinutes() + " " + d.getDate() + "." + (d.getMonth() + 1) + "." + d.getFullYear()
 }
 
+var posts_ = {
+	home: [],
+	livechat: [],
+}
+
 document.addEventListener("DOMContentLoaded", function() {
 	posts = document.getElementById("posts")
 	loginForm = document.getElementById("loginForm")
 	document.getElementById('splash').innerHTML = escapeHTML(splashes[Math.floor(Math.random() * (splashes.length - 1))])
 	isLoggedIn = false;
 	if(supportsWss) {
-		ws = new WebSocket("wss://api.meower.org/v0/cloudlink?v=0") // splecify v0, add support for v1 later
+		ws = new WebSocket("wss://chaos.goog-search.eu.org/")
 	} else {
-		ws = new WebSocket("ws://127.0.0.1:8080/")
+		ws = prompt('server url (enter nothing for localhost:8080') || new WebSocket("ws://127.0.0.1:8080/")
 	}
 	apiURL = "https://api.meower.org/";
 	function addReply(post) {
 		replies.push(post)
 	}
 	function reply(post) {
-		document.getElementById("post-content").value = "@" + post.u + " " + document.getElementById("post-content").value
+		document.getElementById("post-content").value = "@" + post.author.username + " " + document.getElementById("post-content").value
 	}
 	/**
 	 * Add post to posts
@@ -111,17 +116,17 @@ document.addEventListener("DOMContentLoaded", function() {
 			.attr("id", 'post-' + post._id)
 			.child("img")
 				.class("post-pfp")
-				.attr("src", 'https://uploads.meower.org/icons/' + post.author.avatar)
+				.attr("src", post.author.avatar)
 				.attr("float", 'left')
 				.up()
 			.child("div")
 				.class("post-header")
-				.html(escapeHTML(post.u))
+				.html(escapeHTML(post.author.username))
 				.child("div")
 					.class("right")
 					.child("span")
 						.class("date")
-						.html(escapeHTML(formatDate(new Date(post.t.e * 1000))))
+						.html(escapeHTML(formatDate(new Date(post.created * 1000))))
 						.up()
 					.child("button")
 						.class("mention_btn")
@@ -130,31 +135,31 @@ document.addEventListener("DOMContentLoaded", function() {
 						.up()
 					.up()
 				.up()
-			.for(post.reply_to || [], reply => 
+			.for(post.replies || [], reply => 
 					make("a")
 						.attr("id", '#post-' + reply._id)
 						.child("div")
 							.class("reply")
 							.child("span")
 								.class("reply-username")
-								.html(reply ? escapeHTML(reply.u) : "")
+								.html(reply ? escapeHTML(reply.author.username) : "")
 								.up()
 							.child("span")
-								.html(reply ? escapeHTML(reply.p).slice(0, 47) + "..." : "Deleted")
+								.html(reply ? escapeHTML(reply.content).slice(0, 47) + "..." : "Deleted")
 								.up()
 							.up()
 			)
 			.child("div")
-				.html(linkify(escapeHTML(post.p)))
+				.html(linkify(escapeHTML(post.content)))
 				.up()
 			.for(post.attachments || [], attachment => 
 					make("a")
-						.attr("href", `https://uploads.meower.org/attachments/${attachment.id}/${attachment.filename}`)
+						.attr("href", attachment)
 						.attr("target", "_blank")
 						.child("img")
 							.class("post-image")
-							.attr("src", `https://uploads.meower.org/attachments/${attachment.id}/${attachment.filename}?preview`)
-							.attr("alt", attachment.filename)
+							.attr("src", attachment)
+							.attr("alt", filename)
 							.up()
 			);
 		// console.debug(elem)
@@ -168,21 +173,25 @@ document.addEventListener("DOMContentLoaded", function() {
 			parsed = JSON.parse(text)
 		} catch (e) {
 		}
-		if(!parsed.val) return;
-		if(parsed.cmd == "ulist") {
-			ulist = parsed.val.split(";");
+		if(!parsed.data) return; //TODO: error handling
+		if(parsed.command == "ulist") {
+			ulist = parsed.ulist;
 			document.getElementById("ulist").innerHTML = `There are currently ${ulist.length} users online<br>${escapeHTML(ulist.join(", "))}`
 			return;
 		};
-		if(parsed.val != undefined && parsed.val.mode == "auth") {
-			token = parsed.val.payload.token
+		if(parsed.listener == "auth") { //TODO: actual listeners
+			token = parsed.data.token
 			return;
 		};
+		// if(parsed.command)
 		if(!isLoggedIn) return;
-		if(parsed.val.mode != 1) return;
-		console.debug(parsed.val.post_origin != page)
-		if(parsed.val.post_origin != page) return;
-		addPost(parsed.val)
+		if(parsed.command != 'new_post') return;
+		// console.debug(parsed.val.post_origin != page)
+		if(typeof posts_[parsed.data.origin] == undefined)
+			posts_[parsed.data.origin] = [];
+		parsed.data.origin.push(parsed.data)
+		if(parsed.data.origin != page) return;
+		addPost(parsed.data)
 	}
 	ws.onclose = function (ev) {
 		document.getElementById("closed").style = ""
@@ -195,69 +204,42 @@ document.addEventListener("DOMContentLoaded", function() {
 	}
 	function updateHome() {
 		document.getElementById("chat").style = ""
-		document.getElementById("loading").style = ""
-		fetch(apiURL + 'ulist').then(ures => ures.json().then(function (ulistJson) {
-			ulist = ulistJson.autoget.map(function (a) {return a._id});
-			document.getElementById("ulist").innerHTML = `There are currently ${ulist.length} users online<br>${escapeHTML(ulist.join(", "))}`
-			var res;
-			if(page == "home") {
-				res = fetch(apiURL + "home?autoget=1", {
-					"method":"GET"
-				});
-			} else {
-				res = fetch(apiURL + "posts/" + page, {
-					"method":"GET",
-					"headers": {
-						"token": token
-					}
-				});
-			}
-			res.then(function (resp) {
-				resp.json().then(function (json) {
-					document.getElementById("loading").style = "display: none"
-					// console.log(json)
-					json.autoget.reverse().forEach(post => addPost(post))
-					// var postsHtml = json.autoget.map(post => `<div class="post">${escapeHTML(post.u)}: ${escapeHTML(post.p)}</div>`);
-					// document.getElementById("posts").innerHTML = postsHtml.join("\n")
-				})
-			})
-		}))
+		// document.getElementById("loading").style = ""
+		// fetch(apiURL + 'ulist').then(ures => ures.json().then(function (ulistJson) {
+		// 	ulist = ulistJson.autoget.map(function (a) {return a._id});
+		// 	document.getElementById("ulist").innerHTML = `There are currently ${ulist.length} users online<br>${escapeHTML(ulist.join(", "))}`
+		// var res;
+		// if(page == "home") {
+		// 	res = fetch(apiURL + "home?autoget=1", {
+		// 		"method":"GET"
+		// 	});
+		// } else {
+		// 	res = fetch(apiURL + "posts/" + page, {
+		// 		"method":"GET",
+		// 		"headers": {
+		// 			"token": token
+		// 		}
+		// 	});
+		// }
+		// res.then(function (resp) {
+		// 	resp.json().then(function (json) {
+		// document.getElementById("loading").style = "display: none"
+		// console.log(json)
+		// json.autoget.reverse().forEach(post => addPost(post))
+		// var postsHtml = json.autoget.map(post => `<div class="post">${escapeHTML(post.u)}: ${escapeHTML(post.p)}</div>`);
+		// document.getElementById("posts").innerHTML = postsHtml.join("\n")
+		// 	})
+		// })
+		// }))
 	}
 	function doLogin(username, password, cb) {
-		var res = fetch(apiURL + "auth/login/", {
-				"method":"POST",
-				"headers": {
-					"content-type": "application/json"
-				},
-				"body": JSON.stringify({
-					"username":username,
-					"password":password
-				})
-			});
-		res.then(function (resp) {
-			resp.json().then(function (json) {
-				document.getElementById("loading").style = "display: none"
-				if(json.error) {
-					document.getElementById("error").style = "";
-					document.getElementById("error").innerHTML = "Error: " + escapeHTML(json.type);
-					return;
-				}
-				// console.log(json)
-				isLoggedIn = true;
-				token = json.token;
-				user = json.account;
-				if(ws) {
-					ws.send(JSON.stringify({
-						cmd: "authpswd",
-						val: {
-							username: username,
-							pswd: token,
-						},
-					}));
-				}
-				cb()
-			})
-		})
+		ws.send(JSON.stringify({
+			command: "authpswd",
+			username: username,
+			password: password,
+			listener: 'auth'
+		}));
+		cb() //TODO: listeners
 	}
 	function onLoginFormSubmit(ev) {
 		ev.preventDefault();
