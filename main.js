@@ -111,59 +111,77 @@ document.addEventListener("DOMContentLoaded", function() {
 	function addPost(post) {
 		// console.log(post)
 		const elem =
-		make("div")
+		make("table")
 			.class("post")
 			.attr("id", 'post-' + post._id)
-			.child("img")
-				.class("post-pfp")
-				.attr("src", post.author.avatar)
-				.attr("float", 'left')
-				.up()
-			.child("div")
-				.class("post-header")
-				.html(escapeHTML(post.author.username))
-				.child("div")
-					.class("right")
-					.child("span")
-						.class("date")
-						.html(escapeHTML(formatDate(new Date(post.created * 1000))))
-						.up()
-					.child("button")
-						.class("mention_btn")
-						.ev("click", function(){reply(post)})
-						.html("mention")
+			.child("tr")
+				.child("td")
+					.class("post-left")
+					.child("img")
+						.class("post-pfp")
+						.attr("src", post.author.avatar)
+						.attr("float", 'left')
 						.up()
 					.up()
-				.up()
-			.for(post.replies || [], reply => 
-					make("a")
-						.attr("id", '#post-' + reply._id)
+				.child("td")
+					.class("post-right")
+					.child("div")
+						.class("post-header")
+						.html(escapeHTML(post.author.username))
 						.child("div")
-							.class("reply")
+							.class("right")
 							.child("span")
-								.class("reply-username")
-								.html(reply ? escapeHTML(reply.author.username) : "")
+								.class("date")
+								.html(escapeHTML(formatDate(new Date(post.created * 1000))))
 								.up()
-							.child("span")
-								.html(reply ? escapeHTML(reply.content).slice(0, 47) + "..." : "Deleted")
+							.child("button")
+								.class("mention_btn")
+								.ev("click", function(){reply(post)})
+								.html("mention")
 								.up()
 							.up()
-			)
-			.child("div")
-				.html(linkify(escapeHTML(post.content)))
+						.up()
+					.for(post.replies || [], reply => 
+							make("a")
+								.attr("id", '#post-' + reply._id)
+								.child("div")
+									.class("reply")
+									.child("span")
+										.class("reply-username")
+										.html(reply ? escapeHTML(reply.author.username) : "")
+										.up()
+									.child("span")
+										.html(reply ? escapeHTML(reply.content).slice(0, 47) + "..." : "Deleted")
+										.up()
+									.up()
+					)
+					.child("div")
+						.html(linkify(escapeHTML(post.content)))
+						.up()
+					.for(post.attachments || [], attachment => 
+							make("a")
+								.attr("href", attachment)
+								.attr("target", "_blank")
+								.child("img")
+									.class("post-image")
+									.attr("src", attachment)
+									.attr("alt", filename)
+									.up()
+					)
 				.up()
-			.for(post.attachments || [], attachment => 
-					make("a")
-						.attr("href", attachment)
-						.attr("target", "_blank")
-						.child("img")
-							.class("post-image")
-							.attr("src", attachment)
-							.attr("alt", filename)
-							.up()
-			);
+			.up();
 		// console.debug(elem)
 		posts.insertBefore(elem, posts.firstChild)
+	}
+	function parseUlist(ulist) {
+		var parsed = []
+		for (let i = 0; i < Object.keys(ulist).length; i++) {
+			parsed.push(Object.keys(ulist)[i])
+		}
+		return parsed;
+	}
+	function updateUlist() {
+		document.getElementById("ulist").innerHTML = `There are currently ${ulist.length} users online<br>${escapeHTML(ulist.join(", "))}`
 	}
 	ws.onmessage = function(data) {
 		var text = data.data
@@ -173,24 +191,41 @@ document.addEventListener("DOMContentLoaded", function() {
 			parsed = JSON.parse(text)
 		} catch (e) {
 		}
-		if(!parsed.data) return; //TODO: error handling
+		// if(!parsed.data && parsed.command != 'greet') return; //TODO: error handling
 		if(parsed.command == "ulist") {
-			ulist = parsed.ulist;
-			document.getElementById("ulist").innerHTML = `There are currently ${ulist.length} users online<br>${escapeHTML(ulist.join(", "))}`
+			ulist = parseUlist(parsed.ulist);
+			updateUlist()
 			return;
 		};
-		if(parsed.listener == "auth") { //TODO: actual listeners
-			token = parsed.data.token
+		if(parsed.listener == "auth" && parsed.error == false) { //TODO: actual listeners
+			token = parsed.token;
+			isLoggedIn = true;
 			return;
 		};
+		console.log('ball', parsed.command)
 		// if(parsed.command)
-		if(!isLoggedIn) return;
+		if(parsed.command == 'greet') {
+			var messages = parsed.messages;
+			for (let i = 0; i < messages.length; i++) {
+				var message = messages[i];
+				posts_['home'].push(message)
+				// console.log(message)
+			};
+			ulist = parseUlist(parsed.ulist)
+			updateUlist()
+			return;
+		};
 		if(parsed.command != 'new_post') return;
 		// console.debug(parsed.val.post_origin != page)
-		if(typeof posts_[parsed.data.origin] == undefined)
-			posts_[parsed.data.origin] = [];
-		parsed.data.origin.push(parsed.data)
-		if(parsed.data.origin != page) return;
+		var origin = "home";
+		if (parsed.data.origin)
+			origin = parsed.data.origin;
+		if(typeof posts_[origin] == undefined)
+			posts_[origin] = [];
+		posts_[origin].push(parsed.data)
+		if(!isLoggedIn) return;
+		console.log(origin, page)
+		if(origin != page) return;
 		addPost(parsed.data)
 	}
 	ws.onclose = function (ev) {
@@ -223,21 +258,24 @@ document.addEventListener("DOMContentLoaded", function() {
 		// }
 		// res.then(function (resp) {
 		// 	resp.json().then(function (json) {
-		// document.getElementById("loading").style = "display: none"
+		document.getElementById("loading").style = "display: none"
 		// console.log(json)
-		// json.autoget.reverse().forEach(post => addPost(post))
+		posts_.home.reverse().forEach(function (post) {
+			addPost(post)
+		})
 		// var postsHtml = json.autoget.map(post => `<div class="post">${escapeHTML(post.u)}: ${escapeHTML(post.p)}</div>`);
 		// document.getElementById("posts").innerHTML = postsHtml.join("\n")
 		// 	})
 		// })
 		// }))
 	}
+	window.updateHome = updateHome
 	function doLogin(username, password, cb) {
 		ws.send(JSON.stringify({
-			command: "authpswd",
+			command: "login_pswd",
 			username: username,
 			password: password,
-			listener: 'auth'
+			listener: "auth"
 		}));
 		cb() //TODO: listeners
 	}
@@ -279,20 +317,26 @@ document.addEventListener("DOMContentLoaded", function() {
 		console.log(ev);
 		var content = document.getElementById("post-content").value
 		if(page == 'home') {
-			fetch(apiURL + "home/", {
-				"method":"POST",
-				"headers": {
-					"content-type": "application/json",
-					"token": token,
-				},
-				"body": JSON.stringify({
-					"content":content,
-				})
-			}).then(function (resp) {
-				resp.json().then(function (json) {
-					console.log(json)
-				})
-			})
+			// fetch(apiURL + "home/", {
+			// 	"method":"POST",
+			// 	"headers": {
+			// 		"content-type": "application/json",
+			// 		"token": token,
+			// 	},
+			// 	"body": JSON.stringify({
+			// 		"content":content,
+			// 	})
+			// }).then(function (resp) {
+			// 	resp.json().then(function (json) {
+			// 		console.log(json)
+			// 	})
+			// })
+			ws.send(JSON.stringify({
+				command: "post",
+				content: content,
+				attachments: [],
+				replies: []
+			}))
 		} else {
 			fetch(apiURL + "posts/" + page, {
 				"method":"POST",
@@ -313,7 +357,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		document.getElementById("post-content").value = ""
 	}
 	function update() {
-		if(page == 'chats') {
+		if(page == "chats") {
 			updateChat()
 		} else {
 			updateHome();
@@ -328,7 +372,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	document.getElementById("home").addEventListener("click", function () {
 		posts.innerHTML = "<span></span>";
 		page = "home";
-		document.getElementById('pageTitle').innerHTML = escapeHTML('Home')
+		document.getElementById("pageTitle").innerHTML = escapeHTML("Home")
 		updateHome();
 		document.title = "MXPC - Home"
 	})
