@@ -87,6 +87,7 @@ var posts_ = {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+	console.log("ready")
 	posts = document.getElementById("posts")
 	loginForm = document.getElementById("loginForm")
 	document.getElementById('splash').innerHTML = escapeHTML(splashes[Math.floor(Math.random() * (splashes.length - 1))])
@@ -159,8 +160,8 @@ document.addEventListener("DOMContentLoaded", function() {
 					.child("div")
 						.html(linkify(escapeHTML(post.content)))
 						.up()
-					.for(post.attachments || [], attachment => 
-							make("a")
+					.for(post.attachments || [], function (attachment) {
+							return make("a")
 								.attr("href", attachment)
 								.attr("target", "_blank")
 								.child("img")
@@ -168,6 +169,7 @@ document.addEventListener("DOMContentLoaded", function() {
 									.attr("src", attachment)
 									// .attr("alt", filename)
 									.up()
+						}
 					)
 				.up()
 			.up();
@@ -182,7 +184,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		return parsed;
 	}
 	function updateUlist() {
-		document.getElementById("ulist").innerHTML = `There are currently ${ulist.length} users online<br>${escapeHTML(ulist.join(", "))}`
+		document.getElementById("ulist").innerHTML = "There are currently "+ulist.length+" users online<br>"+escapeHTML(ulist.join(", "))
 	}
 	ws.onmessage = function(data) {
 		var text = data.data
@@ -230,17 +232,17 @@ document.addEventListener("DOMContentLoaded", function() {
 		addPost(parsed.data)
 	}
 	ws.onclose = function (ev) {
-		document.getElementById("closed").style = ""
+		document.getElementById("closed").setAttribute("style", "");
 	}
 	function enableLoadingText() {
-		document.getElementById("loading").style = ""
+		document.getElementById("loading").setAttribute("style", "");
 	}
 	function disableLoadingText() {
-		document.getElementById("loading").style = "display: none"
+		document.getElementById("loading").setAttribute("style", "display: none");
 	}
 	function updateHome() {
-		document.getElementById("chat").style = ""
-		// document.getElementById("loading").style = ""
+		document.getElementById("chat").setAttribute("style", "");
+		// document.getElementById("loading").setAttribute("style", "");
 		// fetch(apiURL + 'ulist').then(ures => ures.json().then(function (ulistJson) {
 		// 	ulist = ulistJson.autoget.map(function (a) {return a._id});
 		// 	document.getElementById("ulist").innerHTML = `There are currently ${ulist.length} users online<br>${escapeHTML(ulist.join(", "))}`
@@ -259,7 +261,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		// }
 		// res.then(function (resp) {
 		// 	resp.json().then(function (json) {
-		document.getElementById("loading").style = "display: none"
+		document.getElementById("loading").setAttribute("style", "display: none");
 		// console.log(json)
 		try {
 			posts_.home.reverse().forEach(function (post) {
@@ -296,34 +298,34 @@ document.addEventListener("DOMContentLoaded", function() {
 		// console.log(ev);
 		var username = document.getElementById("login-username").value
 		var password = document.getElementById("login-password").value
-		document.getElementById("error").style = "display: none";
-		document.getElementById("loading").style = ""
+		document.getElementById("error").setAttribute("style", "display: none");
+		document.getElementById("loading").setAttribute("style", "");
 		doLogin(username, password, function () {
-			document.getElementById("loginContainer").style = "display: none"
-			document.getElementById("ulist").style = ""
-			document.getElementById("postForm").style = ""
-			document.getElementById("controls").style = ""
-			document.getElementById("chat").style = ""
-			document.getElementById("postsContainer").style = ""
-			document.getElementById("ulist-container").style = ""
-			document.getElementById("auto-refresh").addEventListener("click", toggleRefresh)
+			document.getElementById("loginContainer").setAttribute("style", "display: none");
+			document.getElementById("ulist").setAttribute("style", "");
+			document.getElementById("postForm").setAttribute("style", "");
+			document.getElementById("controls").setAttribute("style", "");
+			document.getElementById("chat").setAttribute("style", "");
+			document.getElementById("postsContainer").setAttribute("style", "");
+			document.getElementById("ulist-container").setAttribute("style", "");
+			// document.getElementById("auto-refresh").addEventListener("click", toggleRefresh)
 			document.title = "MXPC - Home"
 			updateHome()
 		})
 	}
-	function toggleRefresh() {
-		if(!autoRefreshEnabled) {
-			if(!autoRefresh) {
-				autoRefresh = setInterval(update, 5000);	 
-			}
-			autoRefreshEnabled = true;
-			document.getElementById("auto-refresh").innerHTML = "Auto refresh: ON"
-		} else {
-			autoRefreshEnabled = false;
-			clearInterval(autoRefresh)
-			document.getElementById("auto-refresh").innerHTML = "Auto refresh: OFF"
-		}
-	}
+	// function toggleRefresh() {
+	// 	if(!autoRefreshEnabled) {
+	// 		if(!autoRefresh) {
+	// 			autoRefresh = setInterval(update, 5000);	 
+	// 		}
+	// 		autoRefreshEnabled = true;
+	// 		document.getElementById("auto-refresh").innerHTML = "Auto refresh: ON"
+	// 	} else {
+	// 		autoRefreshEnabled = false;
+	// 		clearInterval(autoRefresh)
+	// 		document.getElementById("auto-refresh").innerHTML = "Auto refresh: OFF"
+	// 	}
+	// }
 	function onPostFormSubmit(ev) {
 		ev.preventDefault();
 		console.log(ev);
@@ -375,12 +377,12 @@ document.addEventListener("DOMContentLoaded", function() {
 			updateHome();
 		}
 	}
-	loginForm.addEventListener("submit", onLoginFormSubmit)
+	loginForm.onsubmit = onLoginFormSubmit
 	document.getElementById("postForm").addEventListener("submit", onPostFormSubmit)
-	document.getElementById("refresh").addEventListener("click", function () {
-		posts.innerHTML = "<span></span>";
-		update()
-	})
+	// document.getElementById("refresh").addEventListener("click", function () {
+	// 	posts.innerHTML = "<span></span>";
+	// 	update()
+	// })
 	document.getElementById("home").addEventListener("click", function () {
 		posts.innerHTML = "<span></span>";
 		page = "home";
@@ -427,12 +429,12 @@ document.addEventListener("DOMContentLoaded", function() {
 			posts.innerHTML = "<span></span>";
 			updateHome();
 		})
-		postContent.style = "cursor: pointer";
+		postContent.setAttribute("style", "cursor: pointer");
 		elem.appendChild(postContent)
 		posts.insertBefore(elem, posts.firstChild)
 	}
 	function updateChat() {
-		document.getElementById("chat").style = "display: none"
+		document.getElementById("chat").setAttribute("style", "display: none");
 		enableLoadingText()
 		fetch(apiURL + "chats/", {
 			"method":"GET",
@@ -442,7 +444,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		}).then(function (resp) {
 			resp.json().then(function (json) {
 				if(Array.prototype.sort) {
-					json.autoget = json.autoget.sort((a, b) => {
+					json.autoget = json.autoget.sort(function(a, b) {
 						return b.last_active - a.last_active;
 					}).reverse();
 				}

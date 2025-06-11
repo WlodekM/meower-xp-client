@@ -1,11 +1,14 @@
-# meower-xp-client
+# soktdeer-xp-client
 
-A silly little meower client made to work on old browsers.
+A silly little soktdeer client made to work on old browsers.
 
 > [!NOTE]
-> This client was tested on firefox 40.0, i do not guarantee that it will work on earlier versions and/or other browsers
+> This client was tested on firefox 12.0 and firefox 40.0, i do not guarantee that it will work on earlier versions and/or other browsers
 
 ## Setting up
+
+> [!NOTE]
+> i think because of the way i have set up https on chaosdeer (it is optional), firefox 12.0 can kinda just,, connect, so uh yeah, proxy is optional
 
 Since Firefox 40.0 doesn't support secure websockets (``wss://``)
 You will have to set up a proxy websocket, for this i have provided the code for a simple proxy in the `proxy` folder.
@@ -34,7 +37,7 @@ node index.js
 
 ### Running the client
 
-To open the client go to [the client's website](https://wlodekm.github.io/meower-xp-client/) or open the index.html file in your browser (might not work)
+To open the client ~~go to [the client's website](https://wlodekm.github.io/meower-xp-client/) or~~ open the index.html file in your browser (might not work)
 
 ## Reccomended IDE setup
 

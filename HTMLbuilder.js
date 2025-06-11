@@ -20,10 +20,10 @@ function makeSigmaHtmlPlusElement(elem) {
         elem.classList.add(className)
         return elem;
     }
-    elem.do = function (a, params) {
-        elem.a(...params)
-        return elem;
-    }
+    // elem.do = function (a, params) {
+    //     elem.a(...params)
+    //     return elem;
+    // }
     elem.ev = function (event, listener) {
         elem.addEventListener(event, listener)
         return elem;
@@ -32,7 +32,10 @@ function makeSigmaHtmlPlusElement(elem) {
         return elem.parentElement
     }
     elem.for = function (array, func) {
-        array.forEach(element => elem.appendChild(func(element)));
+        for (var i = 0; i < array.length; i++) {
+            var element = array[i];
+            elem.appendChild(func(element))
+        }
         return elem
     }
     return elem;
