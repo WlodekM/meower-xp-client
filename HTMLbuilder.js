@@ -1,6 +1,6 @@
 function makeSigmaHtmlPlusElement(elem) {
     elem.child = function (type) {
-        let childElem = makeSigmaHtmlPlusElement(document.createElement(type));
+        var childElem = makeSigmaHtmlPlusElement(document.createElement(type));
         elem.appendChild(childElem)
         return childElem;
     }

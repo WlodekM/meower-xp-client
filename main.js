@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	}
 	function parseUlist(ulist) {
 		var parsed = []
-		for (let i = 0; i < Object.keys(ulist).length; i++) {
+		for (var i = 0; i < Object.keys(ulist).length; i++) {
 			parsed.push(Object.keys(ulist)[i])
 		}
 		return parsed;
@@ -206,7 +206,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		// if(parsed.command)
 		if(parsed.command == 'greet') {
 			var messages = parsed.messages;
-			for (let i = 0; i < messages.length; i++) {
+			for (var i = 0; i < messages.length; i++) {
 				var message = messages[i];
 				posts_['home'].push(message)
 				// console.log(message)
@@ -445,7 +445,7 @@ document.addEventListener("DOMContentLoaded", function() {
 						return b.last_active - a.last_active;
 					}).reverse();
 				}
-				for (let i = 0; i < json.autoget.length; i++) {
+				for (var i = 0; i < json.autoget.length; i++) {
 					addChat(json.autoget[i]);
 				}
 			})
