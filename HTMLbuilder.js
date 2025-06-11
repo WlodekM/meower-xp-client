@@ -8,7 +8,7 @@ function makeSigmaHtmlPlusElement(elem) {
         elem.innerHTML = html;
         return elem;
     }
-    elem.text = function (text) {
+    elem.setText = function (text) {
         elem.innerText = text;
         return elem;
     }

@@ -142,18 +142,18 @@ document.addEventListener("DOMContentLoaded", function() {
 							.up()
 						.up()
 					.for(post.replies || [], reply => 
-							make("a")
-								.attr("id", '#post-' + reply._id)
-								.child("div")
-									.class("reply")
-									.child("span")
-										.class("reply-username")
-										.html(reply ? escapeHTML(reply.author.username) : "")
-										.up()
-									.child("span")
-										.html(reply ? escapeHTML(reply.content).slice(0, 47) + "..." : "Deleted")
-										.up()
+						make("a")
+							.attr("id", '#post-' + reply._id)
+							.child("div")
+								.class("reply")
+								.child("span")
+									.class("reply-username")
+									.html(reply && reply.author && reply.author.username ? escapeHTML(reply.author.username) : "")
 									.up()
+								.child("span")
+									.html(reply ? escapeHTML(reply.content).slice(0, 47) + "..." : "Deleted")
+									.up()
+								.up()
 					)
 					.child("div")
 						.html(linkify(escapeHTML(post.content)))
@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", function() {
 								.child("img")
 									.class("post-image")
 									.attr("src", attachment)
-									.attr("alt", filename)
+									// .attr("alt", filename)
 									.up()
 					)
 				.up()
@@ -260,9 +260,20 @@ document.addEventListener("DOMContentLoaded", function() {
 		// 	resp.json().then(function (json) {
 		document.getElementById("loading").style = "display: none"
 		// console.log(json)
-		posts_.home.reverse().forEach(function (post) {
-			addPost(post)
-		})
+		try {
+			posts_.home.reverse().forEach(function (post) {
+				addPost(post)
+			})
+		} catch (error) {
+			addPost({
+				_id: "10000000-0000-0000-0000-000000000000",
+				created: 0,
+				content: "Error while loading posts\n"+error.toString(),
+				replies: [],
+				attachments: [],
+				author: {"username": "MXPC", "avatar": "x"}
+			})
+		}
 		// var postsHtml = json.autoget.map(post => `<div class="post">${escapeHTML(post.u)}: ${escapeHTML(post.p)}</div>`);
 		// document.getElementById("posts").innerHTML = postsHtml.join("\n")
 		// 	})
